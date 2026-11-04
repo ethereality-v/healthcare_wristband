@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wristband Coach</title>
+<style>
+  :root {
+    --bg: #f4f6f8; --card: #ffffff; --text: #1d2733; --muted: #5f6b7a; --line: #dde3ea;
+    --accent: #1f6feb; --ok: #1a7f37; --warn: #b26a00; --stop: #c62828; --soft: #eef3fb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #11161c; --card: #1a2129; --text: #e6edf3; --muted: #9aa7b4; --line: #2c3640;
+            --accent: #58a6ff; --ok: #3fb950; --warn: #d29922; --stop: #f85149; --soft: #1f2a36; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); }
+  header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 12px 20px; background: var(--card); border-bottom: 1px solid var(--line); }
+  header h1 { font-size: 18px; margin: 0 12px 0 0; }
+  .pill { padding: 2px 10px; border-radius: 999px; font-size: 13px; border: 1px solid var(--line); color: var(--muted); }
+  .pill.on { color: var(--ok); border-color: var(--ok); }
+  .pill.off { color: var(--stop); border-color: var(--stop); }
+  .spacer { flex: 1; }
+  main { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px; padding: 16px 20px; max-width: 1300px; margin: 0 auto; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; padding: 12px 16px; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+  .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 0 0 10px; }
+  button, select, input, textarea { font: inherit; color: inherit; }
+  button { background: var(--soft); border: 1px solid var(--line); border-radius: 8px; padding: 7px 14px; cursor: pointer; }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  button.danger { color: var(--stop); border-color: var(--stop); background: transparent; }
+  button:disabled { opacity: .45; cursor: default; }
+  select, input, textarea { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
+  .alert { display: none; padding: 14px 20px; font-weight: 600; align-items: center; gap: 12px; }
+  .alert.warn { display: flex; background: #fff4e0; color: #7a4a00; }
+  .alert.stop { display: flex; background: var(--stop); color: #fff; font-size: 20px; animation: flash 1s infinite; }
+  @keyframes flash { 50% { opacity: .75; } }
+  @media (prefers-color-scheme: dark) { .alert.warn { background: #3a2a05; color: #f2cc60; } }
+  .exercise { font-size: 30px; font-weight: 700; margin: 0; }
+  .sub { color: var(--muted); }
+  .count { font-size: 96px; font-weight: 800; line-height: 1; margin: 12px 0 4px; font-variant-numeric: tabular-nums; }
+  .count small { font-size: 32px; color: var(--muted); font-weight: 600; }
+  .phase { font-size: 20px; font-weight: 600; margin: 6px 0 12px; }
+  .bar { height: 10px; background: var(--soft); border-radius: 999px; overflow: hidden; margin: 8px 0 14px; }
+  .bar > div { height: 100%; background: var(--accent); width: 0; transition: width .3s; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin: 10px 0 14px; }
+  .stat { background: var(--soft); border-radius: 8px; padding: 8px 10px; }
+  .stat b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; }
+  .stat span { font-size: 12px; color: var(--muted); }
+  .vital { font-size: 54px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .vital small { font-size: 18px; color: var(--muted); font-weight: 600; }
+  .zone-ok { color: var(--ok); } .zone-warn { color: var(--warn); } .zone-stop { color: var(--stop); }
+  ol.plan { margin: 0; padding-left: 32px; max-height: 360px; overflow: auto; }
+  ol.plan li { padding: 3px 0; }
+  ol.plan li.done { color: var(--muted); text-decoration: line-through; }
+  ol.plan li.current { font-weight: 700; color: var(--accent); }
+  .tag { font-size: 11px; padding: 1px 6px; border-radius: 4px; background: var(--soft); color: var(--muted); margin-left: 4px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; }
+  .log { font-size: 13px; max-height: 220px; overflow: auto; color: var(--muted); }
+  .log div.warn { color: var(--warn); }
+  .hidden { display: none !important; }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 6px 0 2px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
+  textarea { width: 100%; min-height: 160px; font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+  .act-progress { color: var(--ok); font-weight: 700; } .act-regress { color: var(--stop); font-weight: 700; } .act-keep { color: var(--muted); font-weight: 700; }
+  .note { font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Wristband Coach</h1>
+  <span id="band" class="pill">band: ?</span>
+  <span id="link" class="pill"></span>
+  <span class="spacer"></span>
+  <select id="patientSelect" aria-label="Patient"></select>
+  <button id="startSession" class="primary">Start session</button>
+  <button id="endSession" class="danger hidden">End session</button>
+</header>
+
+<div id="alert" class="alert"><span id="alertText"></span><span class="spacer"></span><button id="clearAlert">Clear alert</button></div>
+
+<main>
+  <section>
+    <div class="card" id="currentCard">
+      <h2>Current exercise</h2>
+      <p class="exercise" id="exName">No session running</p>
+      <div class="sub" id="exMeta">Pick a patient and press Start session.</div>
+      <div class="count" id="count">&ndash;</div>
+      <div class="phase" id="phase"></div>
+      <div class="bar"><div id="progress"></div></div>
+      <div class="stats">
+        <div class="stat"><b id="lastRom">&ndash;</b><span>last rep ROM (deg)</span></div>
+        <div class="stat"><b id="lastDur">&ndash;</b><span>last rep time (s)</span></div>
+        <div class="stat"><b id="partial">0</b><span>partial reps</span></div>
+        <div class="stat"><b id="cvCount">&ndash;</b><span>camera count</span></div>
+      </div>
+      <div class="row">
+        <button id="startSet" class="primary">Start set</button>
+        <button id="stopSet">Stop set</button>
+        <button id="skip">Skip</button>
+        <input id="manualCount" type="number" min="0" style="width:90px" placeholder="count" aria-label="Manual count">
+        <button id="manual">Enter count</button>
+      </div>
+      <p class="note" id="trackerNote"></p>
+    </div>
+
+    <div class="card hidden" id="finishCard">
+      <h2>Session finished: dosage suggestions</h2>
+      <div class="row">
+        <label for="rpe" style="margin:0">How hard was it? RPE (Borg 6-20)</label>
+        <input id="rpe" type="number" min="6" max="20" style="width:80px">
+        <button id="saveRpe">Save RPE</button>
+      </div>
+      <table id="suggestions"><thead><tr><th></th><th>Exercise</th><th>Suggestion</th><th>Now</th><th>Suggested</th><th>Why</th></tr></thead><tbody></tbody></table>
+      <p class="note">Suggestions are for the kinesiologist and nothing changes until you accept them.</p>
+      <button id="accept" class="primary">Accept selected changes</button>
+    </div>
+
+    <div class="card">
+      <h2>Session history</h2>
+      <table id="history"><thead><tr><th>Session</th><th>Status</th><th>Done</th><th>Avg HR</th><th>Max HR</th><th>Stops</th><th>RPE</th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <aside>
+    <div class="card">
+      <h2>Heart rate &amp; oxygen</h2>
+      <div class="vital" id="hr">&ndash;<small> bpm</small></div>
+      <div class="sub" id="zone"></div>
+      <div class="vital" id="spo2" style="font-size:40px">&ndash;<small> % SpO2</small></div>
+      <div class="sub" id="contact"></div>
+    </div>
+    <div class="card">
+      <h2>Plan</h2>
+      <ol class="plan" id="plan"></ol>
+      <div class="note" id="warnings"></div>
+    </div>
+    <div class="card">
+      <h2>Band</h2>
+      <div class="sub" id="bandInfo">&ndash;</div>
+      <div class="row" style="margin-top:8px">
+        <button id="ping">Ping</button>
+        <button id="calibrate" title="Lay the band flat, face up, first">Calibrate (band flat)</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Patient</h2>
+      <div class="grid2">
+        <div><label for="pId">ID</label><input id="pId" style="width:100%"></div>
+        <div><label for="pName">Name</label><input id="pName" style="width:100%"></div>
+        <div><label for="pAge">Age</label><input id="pAge" type="number" style="width:100%"></div>
+        <div><label for="pRest">Resting HR</label><input id="pRest" type="number" style="width:100%"></div>
+        <div><label for="pMax">Max HR (optional)</label><input id="pMax" type="number" style="width:100%"></div>
+        <div><label><input id="pBeta" type="checkbox"> on beta-blockers</label></div>
+      </div>
+      <label for="pRx">Prescription (JSON)</label>
+      <textarea id="pRx" spellcheck="false"></textarea>
+      <div class="row" style="margin-top:8px"><button id="savePatient">Save patient</button><button id="newPatient">New</button></div>
+      <div class="note" id="patientMsg"></div>
+    </div>
+    <div class="card">
+      <h2>Log</h2>
+      <div class="log" id="log"></div>
+    </div>
+  </aside>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let state = null;
+let patients = [];
+let lastSessionId = null;
+
+async function api(method, path, body) {
+  const res = await fetch(path, { method, headers: { "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || res.statusText);
+  return data;
+}
+function act(method, path, body) { return api(method, path, body).then(render).catch((e) => alert(e.message)); }
+
+const PHASE_TEXT = {
+  idle: "", ready: "Ready: press Start set", waiting_still: "Hold your starting position…", running: "Go!",
+  stopping: "Finishing set…", resting: "Rest", alert: "Stopped for safety: check on the patient", finished: "Session complete"
+};
+
+function fmtTime(s) { const m = Math.floor(s / 60); return m + ":" + String(s % 60).padStart(2, "0"); }
+
+function render(s) {
+  if (!s || !s.phase) return;
+  state = s;
+  const running = s.session_id && s.phase !== "finished";
+  $("startSession").classList.toggle("hidden", !!running);
+  $("endSession").classList.toggle("hidden", !running);
+  $("patientSelect").disabled = !!running;
+
+  // band
+  $("band").textContent = "band: " + (s.band.connected ? "connected" : "not connected");
+  $("band").className = "pill " + (s.band.connected ? "on" : "off");
+  $("link").textContent = s.band.link;
+  $("bandInfo").textContent = [s.band.device || "no hello yet", s.band.state ? "state " + s.band.state : null,
+    s.band.calibrated === false ? "NOT calibrated" : null,
+    s.band.battery_v > 0 ? s.band.battery_v.toFixed(2) + " V" : null].filter(Boolean).join(" · ");
+
+  // alert
+  const al = s.alert || { level: "ok" };
+  $("alert").className = "alert " + (al.level === "ok" ? "" : al.level);
+  $("alertText").textContent = (al.level === "stop" ? "STOP: " : "Caution: ") + (al.reasons || []).join("; ");
+
+  // current step
+  const st = s.step;
+  if (st && s.phase !== "finished") {
+    $("exName").textContent = st.name;
+    $("exMeta").textContent = `Set ${st.set} of ${st.sets} · ${st.category.replace("_", " / ")} · tracked by ${st.tracker === "wrist" ? "wristband" : st.tracker === "camera" ? "camera" : "timer"}`;
+    const unit = st.unit === "reps" ? "" : " " + st.unit;
+    $("count").innerHTML = `${s.count}<small> / ${st.target}${unit}</small>`;
+    $("progress").style.width = Math.min(100, 100 * s.count / st.target) + "%";
+    $("trackerNote").textContent = st.tracker === "camera" ? "Counted by the computer-vision coach. Or type the count and press Enter count." :
+      st.tracker === "timer" ? "Timed block: finishes automatically." : "";
+  } else {
+    $("exName").textContent = s.phase === "finished" ? "Session complete" : "No session running";
+    $("exMeta").textContent = s.phase === "finished" ? "Rate the effort and review the suggestions below." : "Pick a patient and press Start session.";
+    $("count").innerHTML = "&ndash;"; $("progress").style.width = "0"; $("trackerNote").textContent = "";
+  }
+  $("phase").textContent = s.phase === "resting" ? `Rest ${fmtTime(s.rest_remaining)}` : (PHASE_TEXT[s.phase] || s.phase);
+  $("lastRom").textContent = s.last_rep && s.last_rep.rom_deg ? Math.round(s.last_rep.rom_deg) : "–";
+  $("lastDur").textContent = s.last_rep && s.last_rep.duration_ms ? (s.last_rep.duration_ms / 1000).toFixed(1) : "–";
+  $("partial").textContent = s.partial || 0;
+  $("cvCount").textContent = s.cv_count ?? "–";
+  $("startSet").disabled = !["ready", "resting"].includes(s.phase);
+  $("stopSet").disabled = !["waiting_still", "running"].includes(s.phase);
+  $("skip").disabled = !running || s.phase === "alert";
+  $("manual").disabled = !running || !st;
+
+  // vitals
+  const hr = s.vitals.hr, lim = s.limits;
+  $("hr").innerHTML = (hr ?? "–") + "<small> bpm</small>";
+  let zc = "";
+  if (hr && lim) zc = hr > lim.hr_stop ? "zone-stop" : (lim.hr_zone_enabled && hr > lim.zone_high) ? "zone-warn" : "zone-ok";
+  $("hr").className = "vital " + zc;
+  $("zone").textContent = lim ? `Target zone ${lim.zone_low}–${lim.zone_high} bpm · stop above ${lim.hr_stop}` + (lim.hr_zone_enabled ? "" : " (beta-blockers: use RPE)") : "";
+  $("spo2").innerHTML = (s.vitals.spo2 ?? "–") + "<small> % SpO2</small>";
+  $("contact").textContent = s.vitals.contact === false ? "Sensor not touching skin" : "";
+
+  // plan
+  $("plan").innerHTML = s.plan.map((p, i) =>
+    `<li class="${p.done ? "done" : (i === s.step_index && s.phase !== "finished") ? "current" : ""}">${p.name} <span class="tag">set ${p.set}/${p.sets} · ${p.target}${p.unit === "reps" ? "" : " " + p.unit}</span>${p.tracker === "camera" ? '<span class="tag">camera</span>' : ""}</li>`).join("");
+  $("warnings").textContent = (s.warnings || []).join(" · ");
+
+  // finish card
+  $("finishCard").classList.toggle("hidden", s.phase !== "finished");
+  if (s.phase === "finished") {
+    if (document.activeElement !== $("rpe")) $("rpe").value = s.rpe ?? "";
+    $("suggestions").querySelector("tbody").innerHTML = s.suggestions.map((g) =>
+      `<tr><td><input type="checkbox" data-ex="${g.exercise}" ${g.action !== "keep" ? "checked" : ""} aria-label="accept"></td>
+       <td>${g.exercise.replaceAll("_", " ")}</td><td class="act-${g.action}">${g.action}</td>
+       <td>${g.current.sets}×${g.current.target}</td><td>${g.suggested.sets}×${g.suggested.target}</td>
+       <td>${g.reasons.join("; ")}</td></tr>`).join("");
+  }
+
+  $("log").innerHTML = s.events.slice().reverse().map((e) => `<div class="${e.level}">${e.time.slice(11)} ${e.text}</div>`).join("");
+
+  if (s.session_id !== lastSessionId || s.phase === "finished") { lastSessionId = s.session_id; loadHistory(); }
+}
+
+async function loadPatients(selectId) {
+  patients = await api("GET", "/api/patients");
+  const sel = $("patientSelect");
+  sel.innerHTML = patients.map((p) => `<option value="${p.id}">${p.name || p.id} (${p.id})</option>`).join("") || "<option value=''>no patients yet</option>";
+  if (selectId) sel.value = selectId;
+  fillPatientForm();
+  loadHistory();
+}
+
+function fillPatientForm() {
+  const p = patients.find((x) => x.id === $("patientSelect").value);
+  if (!p) return;
+  $("pId").value = p.id; $("pName").value = p.name || ""; $("pAge").value = p.age ?? "";
+  $("pRest").value = p.resting_hr ?? ""; $("pMax").value = p.hr_max ?? ""; $("pBeta").checked = !!p.beta_blocker;
+  $("pRx").value = JSON.stringify(p.prescription, null, 1);
+}
+
+let historyBusy = false;
+async function loadHistory() {
+  const pid = $("patientSelect").value;
+  if (!pid || historyBusy) return;
+  historyBusy = true;
+  try {
+    const rows = await api("GET", "/api/sessions?patient=" + encodeURIComponent(pid));
+    $("history").querySelector("tbody").innerHTML = rows.slice().reverse().map((r) =>
+      `<tr><td>${r.started_at.replace("T", " ")}</td><td>${r.status}</td><td>${r.completion == null ? "–" : Math.round(r.completion * 100) + "%"}</td>
+       <td>${r.avg_hr ?? "–"}</td><td>${r.max_hr ?? "–"}</td><td>${r.stops}</td><td>${r.rpe ?? "–"}</td></tr>`).join("") || "<tr><td colspan=7>No sessions yet</td></tr>";
+  } finally { historyBusy = false; }
+}
+
+$("patientSelect").onchange = () => { fillPatientForm(); loadHistory(); };
+$("startSession").onclick = () => act("POST", "/api/session/start", { patient_id: $("patientSelect").value });
+$("endSession").onclick = () => confirm("End the session now?") && act("POST", "/api/session/end", { status: "ended_early" });
+$("startSet").onclick = () => act("POST", "/api/set/start");
+$("stopSet").onclick = () => act("POST", "/api/set/stop");
+$("skip").onclick = () => act("POST", "/api/set/skip");
+$("manual").onclick = () => { const c = parseInt($("manualCount").value, 10); if (!isNaN(c)) act("POST", "/api/set/complete", { count: c }); };
+$("clearAlert").onclick = () => act("POST", "/api/alert/clear");
+$("saveRpe").onclick = () => act("POST", "/api/rpe", { rpe: parseInt($("rpe").value, 10) });
+$("ping").onclick = () => api("POST", "/api/band/ping");
+$("calibrate").onclick = () => confirm("Is the band lying flat, face up and still?") && api("POST", "/api/band/calibrate");
+$("accept").onclick = async () => {
+  const ids = [...document.querySelectorAll("#suggestions input:checked")].map((c) => c.dataset.ex);
+  try {
+    const r = await api("POST", `/api/patients/${encodeURIComponent(state.patient.id)}/prescription`, { accept: ids, session_id: state.session_id });
+    alert("Prescription updated" + (r.warnings.length ? "\n\nNotes:\n" + r.warnings.join("\n") : ""));
+    loadPatients(state.patient.id);
+  } catch (e) { alert(e.message); }
+};
+$("newPatient").onclick = () => { ["pId", "pName", "pAge", "pRest", "pMax"].forEach((k) => $(k).value = ""); $("pBeta").checked = false; $("pRx").value = ""; };
+$("savePatient").onclick = async () => {
+  const body = { id: $("pId").value.trim(), name: $("pName").value.trim(), age: Number($("pAge").value) || null,
+    resting_hr: Number($("pRest").value) || null, hr_max: Number($("pMax").value) || null, beta_blocker: $("pBeta").checked };
+  try {
+    if ($("pRx").value.trim()) body.prescription = JSON.parse($("pRx").value);
+    await api("POST", "/api/patients", body);
+    $("patientMsg").textContent = "Saved.";
+    loadPatients(body.id);
+  } catch (e) { $("patientMsg").textContent = "Not saved: " + e.message; }
+};
+
+async function poll() {
+  try { render(await api("GET", "/api/state")); } catch (e) { $("band").textContent = "app not reachable"; $("band").className = "pill off"; }
+  setTimeout(poll, 500);
+}
+loadPatients().then(poll);
+</script>
+</body>
+</html>
