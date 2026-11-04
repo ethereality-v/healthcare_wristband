@@ -1,0 +1,82 @@
+{
+  "_comment": "Single source of truth for exercises. tracker=wrist exercises are counted by the band; tracker=camera ones by the CV coach. After editing, run: python tools/gen_exercise_table.py",
+  "categories": [
+    {"id": "warmup", "name": "Cardio warm-up"},
+    {"id": "mobility", "name": "Mobility"},
+    {"id": "squat_lunge", "name": "Squat / Lunge"},
+    {"id": "push", "name": "Push"},
+    {"id": "hinge", "name": "Hinge"},
+    {"id": "pull", "name": "Pull"},
+    {"id": "carry", "name": "Carry"},
+    {"id": "core", "name": "Core"},
+    {"id": "stretch", "name": "Stretches"},
+    {"id": "cooldown", "name": "Cardio cool-down"}
+  ],
+  "exercises": [
+    {"id": "arm_rainbow",        "name": "Arm rainbows",              "category": "mobility",    "tracker": "wrist", "mode": "tilt",   "unit": "reps",    "start_deg": 12, "top_deg": 60, "return_deg": 22, "min_rep_ms": 1000, "max_rep_ms": 10000},
+    {"id": "thoracic_rotation",  "name": "Thoracic spine rotations",  "category": "mobility",    "tracker": "wrist", "mode": "motion", "unit": "reps",    "axis": "dominant", "threshold": 0.28, "min_rep_ms": 1000, "max_rep_ms": 10000},
+    {"id": "wall_angel",         "name": "Wall angels",               "category": "mobility",    "tracker": "wrist", "mode": "motion", "unit": "reps",    "axis": "vertical", "threshold": 0.22, "min_rep_ms": 1200, "max_rep_ms": 10000},
+    {"id": "standing_hip_opener","name": "Standing hip opener/closer","category": "mobility",    "tracker": "camera"},
+    {"id": "airplane",           "name": "Airplane",                  "category": "mobility",    "tracker": "camera"},
+    {"id": "scapular_squeeze",   "name": "Scapular squeezes",         "category": "mobility",    "tracker": "camera"},
+
+    {"id": "ball_squat",         "name": "Ball squats",               "category": "squat_lunge", "tracker": "wrist", "mode": "motion", "unit": "reps",    "axis": "vertical", "threshold": 0.25, "min_rep_ms": 1200, "max_rep_ms": 10000},
+    {"id": "goblet_squat",       "name": "Goblet squats",             "category": "squat_lunge", "tracker": "wrist", "mode": "motion", "unit": "reps",    "axis": "vertical", "threshold": 0.25, "min_rep_ms": 1200, "max_rep_ms": 10000},
+    {"id": "box_squat",          "name": "Box squats",                "category": "squat_lunge", "tracker": "wrist", "mode": "motion", "unit": "reps",    "axis": "vertical", "threshold": 0.25, "min_rep_ms": 1200, "max_rep_ms": 10000},
+    {"id": "step_up",            "name": "Step-ups",                  "category": "squat_lunge", "tracker": "wrist", "mode": "motion", "unit": "reps",    "axis": "vertical", "threshold": 0.30, "min_rep_ms": 1000, "max_rep_ms": 8000},
+    {"id": "lunge",              "name": "Lunges",                    "category": "squat_lunge", "tracker": "wrist", "mode": "motion", "unit": "reps",    "axis": "vertical", "threshold": 0.25, "min_rep_ms": 1200, "max_rep_ms": 10000},
+    {"id": "wall_sit",           "name": "Wall sits",                 "category": "squat_lunge", "tracker": "wrist", "mode": "hold",   "unit": "seconds"},
+
+    {"id": "chest_press",        "name": "Chest press",               "category": "push",        "tracker": "wrist", "mode": "motion", "unit": "reps",    "axis": "vertical", "threshold": 0.30, "min_rep_ms": 1000, "max_rep_ms": 8000},
+    {"id": "incline_press",      "name": "Incline press",             "category": "push",        "tracker": "wrist", "mode": "motion", "unit": "reps",    "axis": "dominant", "threshold": 0.30, "min_rep_ms": 1000, "max_rep_ms": 8000},
+    {"id": "shoulder_press",     "name": "Shoulder press",            "category": "push",        "tracker": "wrist", "mode": "motion", "unit": "reps",    "axis": "vertical", "threshold": 0.30, "min_rep_ms": 1000, "max_rep_ms": 8000},
+    {"id": "arnold_press",       "name": "Arnold press",              "category": "push",        "tracker": "wrist", "mode": "motion", "unit": "reps",    "axis": "vertical", "threshold": 0.30, "min_rep_ms": 1200, "max_rep_ms": 9000},
+    {"id": "chest_fly",          "name": "Chest fly",                 "category": "push",        "tracker": "wrist", "mode": "tilt",   "unit": "reps",    "start_deg": 10, "top_deg": 45, "return_deg": 18, "min_rep_ms": 1000, "max_rep_ms": 8000},
+    {"id": "cable_crossover",    "name": "Cable crossovers",          "category": "push",        "tracker": "wrist", "mode": "motion", "unit": "reps",    "axis": "dominant", "threshold": 0.30, "min_rep_ms": 1000, "max_rep_ms": 8000},
+    {"id": "front_raise",        "name": "Front raises",              "category": "push",        "tracker": "wrist", "mode": "tilt",   "unit": "reps",    "start_deg": 12, "top_deg": 60, "return_deg": 22, "min_rep_ms": 1000, "max_rep_ms": 8000},
+    {"id": "push_up",            "name": "Push-ups",                  "category": "push",        "tracker": "camera"},
+    {"id": "wall_push_up",       "name": "Wall push-ups",             "category": "push",        "tracker": "camera"},
+    {"id": "close_grip_push_up", "name": "Close-grip push-ups",       "category": "push",        "tracker": "camera"},
+
+    {"id": "kettlebell_swing",   "name": "Kettlebell swings",         "category": "hinge",       "tracker": "wrist", "mode": "tilt",   "unit": "reps",    "start_deg": 15, "top_deg": 50, "return_deg": 25, "min_rep_ms": 700,  "max_rep_ms": 5000},
+    {"id": "romanian_deadlift",  "name": "Romanian deadlifts",        "category": "hinge",       "tracker": "camera"},
+    {"id": "good_morning",       "name": "Good mornings",             "category": "hinge",       "tracker": "camera"},
+    {"id": "deadlift",           "name": "Deadlifts",                 "category": "hinge",       "tracker": "camera"},
+    {"id": "glute_bridge",       "name": "Glute bridges",             "category": "hinge",       "tracker": "camera"},
+    {"id": "ball_leg_curl",      "name": "Stability ball leg curls",  "category": "hinge",       "tracker": "camera"},
+
+    {"id": "bicep_curl",         "name": "Bicep curls",               "category": "pull",        "tracker": "wrist", "mode": "tilt",   "unit": "reps",    "start_deg": 12, "top_deg": 70, "return_deg": 25, "min_rep_ms": 800,  "max_rep_ms": 8000},
+    {"id": "hammer_curl",        "name": "Hammer curls",              "category": "pull",        "tracker": "wrist", "mode": "tilt",   "unit": "reps",    "start_deg": 12, "top_deg": 70, "return_deg": 25, "min_rep_ms": 800,  "max_rep_ms": 8000},
+    {"id": "cable_curl",         "name": "Cable curls",               "category": "pull",        "tracker": "wrist", "mode": "tilt",   "unit": "reps",    "start_deg": 12, "top_deg": 70, "return_deg": 25, "min_rep_ms": 800,  "max_rep_ms": 8000},
+    {"id": "reverse_fly",        "name": "Reverse fly",               "category": "pull",        "tracker": "wrist", "mode": "tilt",   "unit": "reps",    "start_deg": 10, "top_deg": 40, "return_deg": 18, "min_rep_ms": 1000, "max_rep_ms": 8000},
+    {"id": "bent_over_row",      "name": "Bent-over row",             "category": "pull",        "tracker": "wrist", "mode": "motion", "unit": "reps",    "axis": "dominant", "threshold": 0.28, "min_rep_ms": 1000, "max_rep_ms": 8000},
+    {"id": "seated_row",         "name": "Seated row",                "category": "pull",        "tracker": "wrist", "mode": "motion", "unit": "reps",    "axis": "dominant", "threshold": 0.28, "min_rep_ms": 1000, "max_rep_ms": 8000},
+    {"id": "lat_pulldown",       "name": "Lat pulldown",              "category": "pull",        "tracker": "wrist", "mode": "motion", "unit": "reps",    "axis": "vertical", "threshold": 0.28, "min_rep_ms": 1000, "max_rep_ms": 8000},
+    {"id": "band_row",           "name": "Resistance band rows",      "category": "pull",        "tracker": "wrist", "mode": "motion", "unit": "reps",    "axis": "dominant", "threshold": 0.28, "min_rep_ms": 1000, "max_rep_ms": 8000},
+    {"id": "trx_row",            "name": "TRX row",                   "category": "pull",        "tracker": "camera"},
+
+    {"id": "farmers_carry",      "name": "Farmer's carry",            "category": "carry",       "tracker": "wrist", "mode": "motion", "unit": "steps",   "axis": "vertical", "threshold": 0.80, "min_rep_ms": 300,  "max_rep_ms": 2000},
+    {"id": "suitcase_carry",     "name": "Suitcase carry",            "category": "carry",       "tracker": "wrist", "mode": "motion", "unit": "steps",   "axis": "vertical", "threshold": 0.80, "min_rep_ms": 300,  "max_rep_ms": 2000},
+
+    {"id": "torso_rotation",     "name": "Torso rotations",           "category": "core",        "tracker": "wrist", "mode": "motion", "unit": "reps",    "axis": "dominant", "threshold": 0.28, "min_rep_ms": 1000, "max_rep_ms": 8000},
+    {"id": "pallof_press",       "name": "Pallof press",              "category": "core",        "tracker": "wrist", "mode": "motion", "unit": "reps",    "axis": "dominant", "threshold": 0.25, "min_rep_ms": 1000, "max_rep_ms": 8000},
+    {"id": "plank",              "name": "Plank",                     "category": "core",        "tracker": "camera", "unit": "seconds"},
+    {"id": "side_plank",         "name": "Side plank",                "category": "core",        "tracker": "camera", "unit": "seconds"},
+    {"id": "bird_dog",           "name": "Bird dog",                  "category": "core",        "tracker": "camera"},
+    {"id": "dead_bug",           "name": "Dead bug",                  "category": "core",        "tracker": "camera"},
+    {"id": "mountain_climber",   "name": "Mountain climbers",         "category": "core",        "tracker": "camera"},
+    {"id": "leg_raise",          "name": "Leg raises",                "category": "core",        "tracker": "camera"},
+
+    {"id": "hamstring_stretch",  "name": "Hamstring stretch",         "category": "stretch",     "tracker": "camera", "unit": "seconds"},
+    {"id": "calf_stretch",       "name": "Calf stretch",              "category": "stretch",     "tracker": "camera", "unit": "seconds"},
+    {"id": "chest_doorway_stretch","name": "Chest doorway stretch",   "category": "stretch",     "tracker": "camera", "unit": "seconds"},
+    {"id": "upper_trap_stretch", "name": "Upper trap stretch",        "category": "stretch",     "tracker": "camera", "unit": "seconds"},
+    {"id": "childs_pose",        "name": "Child's pose",              "category": "stretch",     "tracker": "camera", "unit": "seconds"},
+    {"id": "hip_flexor_stretch", "name": "Hip flexor stretch",        "category": "stretch",     "tracker": "camera", "unit": "seconds"},
+    {"id": "cat_cow",            "name": "Cat-cow stretch",           "category": "stretch",     "tracker": "camera", "unit": "seconds"},
+    {"id": "neck_side_stretch",  "name": "Neck side stretch",         "category": "stretch",     "tracker": "camera", "unit": "seconds"},
+
+    {"id": "warmup_march",       "name": "Marching warm-up",          "category": "warmup",      "tracker": "timer"},
+    {"id": "cooldown_walk",      "name": "Slow walk cool-down",       "category": "cooldown",    "tracker": "timer"}
+  ]
+}
