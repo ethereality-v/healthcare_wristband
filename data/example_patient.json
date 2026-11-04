@@ -1,0 +1,26 @@
+{
+  "id": "P001",
+  "name": "Example Patient",
+  "age": 68,
+  "resting_hr": 72,
+  "beta_blocker": false,
+  "hr_max": null,
+  "notes": "Fictional patient for testing. Replace with real assessment data entered by the kinesiologist.",
+  "prescription": {
+    "exercises": [
+      {"exercise": "warmup_march",          "sets": 1, "target": 300, "rest_s": 0},
+      {"exercise": "arm_rainbow",           "sets": 1, "target": 10,  "rest_s": 30},
+      {"exercise": "thoracic_rotation",     "sets": 1, "target": 10,  "rest_s": 30},
+      {"exercise": "goblet_squat",          "sets": 2, "target": 10,  "rest_s": 60},
+      {"exercise": "shoulder_press",        "sets": 2, "target": 10,  "rest_s": 60},
+      {"exercise": "kettlebell_swing",      "sets": 1, "target": 12,  "rest_s": 60},
+      {"exercise": "bicep_curl",            "sets": 2, "target": 12,  "rest_s": 60, "top_deg": 70},
+      {"exercise": "farmers_carry",         "sets": 1, "target": 40,  "rest_s": 60},
+      {"exercise": "torso_rotation",        "sets": 1, "target": 12,  "rest_s": 45},
+      {"exercise": "push_up",               "sets": 1, "target": 10,  "rest_s": 45, "notes": "wall push-up if needed; counted by the CV coach"},
+      {"exercise": "hamstring_stretch",     "sets": 1, "target": 30,  "rest_s": 0},
+      {"exercise": "chest_doorway_stretch", "sets": 1, "target": 30,  "rest_s": 0},
+      {"exercise": "cooldown_walk",         "sets": 1, "target": 300, "rest_s": 0}
+    ]
+  }
+}
