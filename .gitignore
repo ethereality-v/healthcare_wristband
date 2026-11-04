@@ -1,0 +1,23 @@
+# Wi-Fi password
+firmware/wristband/secrets.h
+
+# Patient data (health information: never commit)
+data/database.json
+data/.db-*.json
+*.csv
+
+# Build / test output
+firmware/test/test_runner
+firmware/test/test_runner.exe
+build/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
