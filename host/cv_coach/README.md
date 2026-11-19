@@ -62,6 +62,25 @@ python main.py
 
 The MediaPipe pose model downloads automatically into this folder on the first run.
 
+## Build a Windows EXE
+
+If you want to give the tracker to someone who does not have Python installed, build the Windows executable on a Windows computer. Open PowerShell in this project folder and run:
+
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass
+.\build_windows.ps1
+```
+
+The build script creates its own `.venv`, installs the required packages and PyInstaller, downloads the pose model, and creates:
+
+```text
+dist\ExerciseTracker.exe
+```
+
+You can also double-click `build_windows.bat`. Copy `ExerciseTracker.exe` to another Windows computer and run it. Windows may show a SmartScreen warning because this personal EXE is not digitally signed. Choose **More info** and **Run anyway** only if you trust the copy you built.
+
+The executable uses the same keyboard controls as the Python version. You do not need to install Python on the computer where the EXE is used.
+
 After installing the dependencies, use **Python: Select Interpreter** in VS Code to select the `.venv` interpreter. Then press `F5` and choose **Run Exercise Tracker**, or run `python main.py` in the terminal.
 
 ## Controls
@@ -104,7 +123,10 @@ This is a fitness aid, not a medical device or a substitute for coaching. Stop i
 exercise-tracker/
 ├── .vscode/
 │   └── launch.json                 # F5 launch configuration
-├── main.py                         # Webcam loop and controls
+├── ExerciseTracker.spec             # PyInstaller build recipe
+├── build_windows.ps1                # PowerShell EXE build script
+├── build_windows.bat                # Double-click EXE build launcher
+├── main.py                          # Webcam loop and controls
 ├── requirements.txt                # Python dependencies
 ├── README.md                       # Setup and use
 └── fitness_tracker/
