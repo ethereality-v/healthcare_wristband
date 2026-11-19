@@ -11,6 +11,7 @@ import cv2  # type: ignore[import-not-found]
 
 from fitness_tracker.display import draw_dashboard, draw_pose
 from fitness_tracker.exercises import EXERCISES, create_trackers
+from fitness_tracker.live_share import DEFAULT_PORT, LiveShare
 from fitness_tracker.pose import PoseEngine, ensure_model
 
 # Keep the downloaded model beside the application so the project is portable.
@@ -50,6 +51,12 @@ def parse_args() -> argparse.Namespace:
         default=PROJECT_DIR / "pose_landmarker.task",
         help="Path to the MediaPipe pose model.",
     )
+    parser.add_argument(
+        "--share-port",
+        type=int,
+        default=DEFAULT_PORT,
+        help="Port for sending results to the Man-GO dashboard. 0 turns it off.",
+    )
     return parser.parse_args()
 
 def open_camera(index: int, width: int, height: int):
@@ -80,6 +87,15 @@ def main() -> int:
         for exercise in EXERCISES
     }
     trackers = create_trackers()
+
+    # Send live results to the Man-GO dashboard (host/live_dashboard/index.html).
+    share = LiveShare(args.share_port) if args.share_port else None
+    if share is not None:
+        if share.start():
+            print(f"Sharing results with the dashboard at http://127.0.0.1:{args.share_port}/cv")
+        else:
+            print(f"Port {args.share_port} is busy, so results won't reach the dashboard.")
+            share = None
 
     # Start with push-ups selected.
     selected_key = "4"
@@ -157,6 +173,9 @@ def main() -> int:
                     paused,
                 )
 
+                if share is not None:
+                    share.publish(spec, tracker, view, paused, fps)
+
                 cv2.imshow(
                     "Move / Rehab Coach",
                     frame,
@@ -193,6 +212,8 @@ def main() -> int:
 
     finally:
         # Always release the camera and close OpenCV windows.
+        if share is not None:
+            share.stop()
         camera.release()
         cv2.destroyAllWindows()
 

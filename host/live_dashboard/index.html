@@ -12,6 +12,7 @@
     --mango: #FFA41B; --mango-dark: #DB7C00; --mango-soft: #FFF2DC;
     --heart: #FF4B6E; --heart-dark: #D6304F; --heart-soft: #FFE6EB;
     --sky: #1CB0F6;   --sky-dark: #1386BD;   --sky-soft: #E1F4FE;
+    --grape: #A560E8; --grape-dark: #7E3FC4; --grape-soft: #F4EAFE;
     --ink: #3C3C3C;   --muted: #808080;      --line: #E5E5E5;   --page: #FFFFFF;
     --radius-card: 18px; --radius-hero: 28px;
   }
@@ -171,6 +172,35 @@
   .tone-good { color: var(--leaf-dark); } .tone-warn { color: var(--mango-dark); }
   .tone-bad { color: var(--heart-dark); } .tone-quiet { color: var(--muted); }
 
+  /* camera coach panel */
+  .cv {
+    margin-top: 16px; border: 2px solid var(--line); border-bottom-width: 5px; border-radius: 24px;
+    padding: 16px 18px 18px;
+  }
+  .cv.on { border-color: #E2CCFA; }
+  .cv-head { display: flex; align-items: center; gap: 12px; }
+  .cv-head .ico { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; background: var(--grape-soft); color: var(--grape); flex: none; }
+  .cv-head .ico svg { width: 28px; height: 28px; }
+  .cv-head .who { flex: 1; min-width: 0; }
+  .cv-head .who b { display: block; font-size: 15px; color: var(--muted); font-weight: 800; }
+  .cv-head .who span { display: block; font-size: 21px; font-weight: 900; line-height: 1.2; }
+  .cv-state { flex: none; }
+  .cv-state.watching { color: var(--grape-dark); border-color: var(--grape); }
+  .cv-state.watching .dot { background: var(--grape); }
+  .cv-state.lost { color: var(--mango-dark); border-color: var(--mango); }
+  .cv-state.lost .dot { background: var(--mango); }
+  .cv-body { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center; margin-top: 14px; }
+  .cv-count { min-width: 120px; }
+  .cv-count .n { font-weight: 900; font-size: 64px; line-height: 1; color: var(--grape); letter-spacing: -1px; display: inline-block; }
+  .cv-count .n.pop { animation: pop 0.45s cubic-bezier(.3,1.7,.5,1); }
+  .cv-count .u { font-size: 16px; color: var(--muted); font-weight: 800; }
+  .cv-count .sides { font-size: 15px; color: var(--muted); margin-top: 4px; }
+  .cv-tip { background: var(--grape-soft); border-radius: 16px; padding: 12px 14px; }
+  .cv-tip .stage { display: inline-block; background: #fff; color: var(--grape-dark); border-radius: 999px; padding: 2px 10px; font-size: 14px; font-weight: 900; margin-bottom: 6px; }
+  .cv-tip p { margin: 0; font-weight: 800; }
+  .cv-metric { margin-top: 10px; font-size: 14px; color: var(--muted); }
+  .cv-off p { margin: 12px 0 0; color: var(--muted); }
+  .cv-off code { font-family: Consolas, "Courier New", monospace; font-size: 14px; background: #F2F2F2; border-radius: 8px; padding: 2px 7px; color: var(--ink); }
   .status-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
   .pill {
     display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px;
@@ -237,6 +267,8 @@
     .mango { width: 88px; height: 98px; }
     .bubble { font-size: 16px; }
     .stat .val { font-size: 28px; }
+    .cv-body { grid-template-columns: 1fr; gap: 10px; }
+    .cv-count .n { font-size: 52px; }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -254,6 +286,7 @@
   <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="m12 2.6 2.9 6 6.5.8-4.8 4.5 1.2 6.5L12 17.2l-5.8 3.2 1.2-6.5L2.6 9.4l6.5-.8z"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="m7.5 12.3 3 3 6-6.3" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-gear" viewBox="0 0 24 24"><path fill="currentColor" d="M10.3 2h3.4l.5 2.6c.6.2 1.2.5 1.7.9l2.5-.9 1.7 2.9-2 1.8c.1.6.1 1.3 0 1.9l2 1.8-1.7 2.9-2.5-.9c-.5.4-1.1.7-1.7.9l-.5 2.6h-3.4l-.5-2.6c-.6-.2-1.2-.5-1.7-.9l-2.5.9L3.9 15l2-1.8c-.1-.6-.1-1.3 0-1.9l-2-1.8 1.7-2.9 2.5.9c.5-.4 1.1-.7 1.7-.9zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" transform="translate(0 1.5)"/></symbol>
+  <symbol id="i-cam" viewBox="0 0 24 24"><path fill="currentColor" d="M4 6.5h3l1.6-2.3h6.8L17 6.5h3a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.5a2 2 0 0 1 2-2z"/><circle cx="12" cy="13" r="4.2" fill="#fff"/><circle cx="12" cy="13" r="2.4" fill="currentColor"/></symbol>
   <symbol id="i-alert" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.5 1.8 20.5h20.4z"/><path d="M12 9v5.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="17.6" r="1.5" fill="#fff"/></symbol>
 </svg>
 
@@ -316,6 +349,7 @@
     <div class="actions">
       <button class="btn btn-go" id="connectBtn">Connect band</button>
       <button class="btn btn-plain" id="demoBtn">Try a demo</button>
+      <button class="btn btn-plain hidden" id="cameraOnlyBtn">Continue with camera only</button>
     </div>
     <p class="note" id="browserNote">Close the Arduino Serial Monitor first. Only one program can use the band's port at a time.</p>
   </section>
@@ -384,6 +418,30 @@
         <div class="name">Session time</div>
         <div class="val" id="timeVal">0:00</div>
         <div class="hint tone-quiet" id="timeHint">Average rep: --</div>
+      </div>
+    </div>
+
+    <div class="cv" id="cvPanel">
+      <div class="cv-head">
+        <div class="ico"><svg><use href="#i-cam"/></svg></div>
+        <div class="who"><b>Camera coach</b><span id="cvExercise">Not running</span></div>
+        <span class="pill cv-state" id="cvState"><span class="dot"></span><span id="cvStateText">Off</span></span>
+      </div>
+      <div class="cv-off" id="cvOff">
+        <p>Start the camera coach to see form tips here. In a terminal, go to <code>host/cv_coach</code> and run <code>python main.py</code>.</p>
+      </div>
+      <div class="hidden" id="cvOn">
+        <div class="cv-body">
+          <div class="cv-count">
+            <span class="n" id="cvCount">0</span> <span class="u" id="cvUnit">reps</span>
+            <div class="sides" id="cvSides"></div>
+          </div>
+          <div class="cv-tip" aria-live="polite">
+            <span class="stage" id="cvStage">Ready</span>
+            <p id="cvCue">Follow the setup shown in the exercise menu.</p>
+          </div>
+        </div>
+        <div class="cv-metric" id="cvMetric"></div>
       </div>
     </div>
 
@@ -758,6 +816,7 @@ async function connect() {
     return;
   }
   stopDemo();
+  CV.cameraOnly = false; placeCvPanel(false);
   try {
     port = await navigator.serial.requestPort();      // the browser asks which port (pick the CP210x one)
     await port.open({ baudRate: 115200 });
@@ -833,7 +892,10 @@ $("disconnectBtn").onclick = () => (demo ? (stopDemo(), onDisconnected()) : disc
 
 // ---------- demo mode: produces the same lines the band prints ----------
 let demo = false, demoTimers = [];
-function stopDemo() { demo = false; demoTimers.forEach(clearTimeout); demoTimers.forEach(clearInterval); demoTimers = []; }
+function stopDemo() {
+  demo = false; demoTimers.forEach(clearTimeout); demoTimers.forEach(clearInterval); demoTimers = [];
+  if (CV.demo) { CV.demo = false; CV.online = false; CV.data = null; if (typeof renderCv === "function") renderCv(); }
+}
 function at(ms, fn) { demoTimers.push(setTimeout(fn, ms)); }
 
 function startDemo() {
@@ -847,6 +909,7 @@ function startDemo() {
     say("# Health Band Started!"); say("# Exercise session started!");
     say("time_ms,session_seconds,ax,ay,az,magnitude,pitch_deg,roll_deg,repetitions,rep_event,last_rep_duration_ms,average_rep_duration_ms,peak_acceleration,movement_status,heart_rate_bpm,spo2_percent");
     runDemoSession();
+    startDemoCamera();
   });
 }
 function runDemoSession() {
@@ -888,9 +951,130 @@ function runDemoSession() {
 }
 $("demoBtn").onclick = () => { if (port) return; startDemo(); };
 
+// ---------- camera coach (computer vision app in host/cv_coach) ----------
+// main.py shares its latest results at this address while it runs.
+const CV_URL = "http://127.0.0.1:8765/cv";
+const CV = { online: false, data: null, fails: 0, demo: false, cameraOnly: false };
+
+const titleCase = (t) => (t || "").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+
+function cvCheer(text) {
+  const n = $("cvCount"); n.classList.remove("pop"); void n.offsetWidth; n.classList.add("pop");
+  toast(text);
+  if (!alerting()) { mood("wow", "hop"); setTimeout(() => { if (!alerting()) mood("happy"); }, 1200); }
+}
+
+function applyCv(d) {
+  const prev = CV.data;
+  const same = prev && d && prev.key === d.key && prev.exercise;
+  // New reps on the same exercise earn XP. Switching exercise or pressing R does not.
+  if (same && d.kind === "reps" && d.count > prev.count) {
+    S.xp += 10 * (d.count - prev.count);
+    cvCheer(`Camera counted rep ${d.count}!  +10 XP`);
+  }
+  // Holds earn XP every 10 seconds of good position.
+  if (same && d.kind === "time" && d.seconds !== null) {
+    const now10 = Math.floor(d.seconds / 10), before10 = Math.floor((prev.seconds || 0) / 10);
+    if (now10 > before10) { S.xp += 10 * (now10 - before10); cvCheer(`${now10 * 10} seconds held!  +10 XP`); }
+  }
+  CV.data = d;
+  renderCv();
+  $("xpChip").textContent = `${S.xp} XP`;
+}
+
+function renderCv() {
+  const d = CV.data;
+  const on = CV.online && d && d.exercise;
+  $("cvPanel").classList.toggle("on", !!on);
+  $("cvOff").classList.toggle("hidden", !!on);
+  $("cvOn").classList.toggle("hidden", !on);
+  $("cameraOnlyBtn").classList.toggle("hidden", !CV.online || !!port);
+  const st = $("cvState"); st.classList.remove("watching", "lost");
+  if (!CV.online) { $("cvExercise").textContent = "Not running"; $("cvStateText").textContent = "Off"; return; }
+  if (!on) { $("cvExercise").textContent = "Starting up"; $("cvStateText").textContent = "Starting"; return; }
+
+  $("cvExercise").textContent = d.exercise;
+  if (d.paused) $("cvStateText").textContent = "Paused";
+  else if (!d.detected) { st.classList.add("lost"); $("cvStateText").textContent = "Move into view"; }
+  else { st.classList.add("watching"); $("cvStateText").textContent = "Watching"; }
+
+  if (d.kind === "time") {
+    const sec = Math.floor(d.seconds || 0);
+    $("cvCount").textContent = sec >= 60 ? fmtTime(sec) : sec;
+    $("cvUnit").textContent = sec >= 60 ? "held" : "seconds held";
+    $("cvSides").textContent = "";
+  } else {
+    $("cvCount").textContent = d.count;
+    $("cvUnit").textContent = d.count === 1 ? "rep" : "reps";
+    $("cvSides").textContent = d.left || d.right ? `Left ${d.left}, right ${d.right}` : "";
+  }
+  $("cvStage").textContent = titleCase(d.stage);
+  $("cvCue").textContent = d.cue || "";
+  $("cvMetric").textContent = (d.metric || "").replace(/ deg\b/g, "°").replace(/ \| /g, ", ");
+}
+
+async function pollCv() {
+  if (!CV.demo) {
+    try {
+      const ctl = new AbortController();
+      const timer = setTimeout(() => ctl.abort(), 800);
+      const r = await fetch(CV_URL, { cache: "no-store", signal: ctl.signal });
+      clearTimeout(timer);
+      const d = await r.json();
+      CV.fails = 0;
+      if (!CV.online) { CV.online = true; if (S.stage !== "welcome") toast("Camera coach connected", true); }
+      applyCv(d);
+    } catch (e) {
+      CV.fails += 1;
+      if (CV.fails >= 3 && CV.online) { CV.online = false; CV.data = null; renderCv(); }
+    }
+  }
+  // check often while connected, less often while the camera coach isn't running
+  setTimeout(pollCv, CV.online ? 400 : 2000);
+}
+
+// In camera-only mode the camera panel moves to the top, since the band isn't sending data.
+function placeCvPanel(top) {
+  const panel = $("cvPanel");
+  if (top) $("screenLive").querySelector(".coach").after(panel);
+  else $("screenLive").querySelector(".grid").after(panel);
+  panel.style.marginBottom = top ? "16px" : "";
+}
+
+$("cameraOnlyBtn").onclick = () => {
+  CV.cameraOnly = true;
+  placeCvPanel(true);
+  show("live");
+  $("liveBubble").textContent = "Camera only. Pick an exercise in the camera coach window and start moving.";
+  render();
+};
+
+function startDemoCamera() {
+  CV.demo = true; CV.online = true; CV.data = null;
+  const t0 = performance.now();
+  let count = 0, left = 0, right = 0, down = false, next = 2500;
+  const cues = ["Lower until the front knee is near 90 degrees, then stand tall.", "Keep your chest up and your front knee over your ankle."];
+  demoTimers.push(setInterval(() => {
+    if (!CV.demo) return;
+    const t = performance.now() - t0;
+    if (t > next - 1200 && !down) down = true;
+    if (t >= next) { count++; (count % 2 ? left++ : right++); down = false; next += 4200; }
+    const detected = !(t > 21000 && t < 24000);   // step out of frame for a moment
+    const kneeL = down ? 92 + Math.round(Math.random() * 8) : 168, kneeR = down ? 140 : 170;
+    applyCv({ running: true, exercise: "Lunges", key: "3", camera: "Side or 45-degree view", kind: "reps",
+      count, left, right, seconds: null, value: String(count), stage: down ? "DOWN" : (count ? "UP" : "READY"),
+      metric: `L knee ${kneeL} deg | R knee ${kneeR} deg`,
+      cue: detected ? cues[count % 2] : "Use a side or 45-degree view with both feet visible.",
+      detected, paused: false, fps: 29.7 });
+  }, 500));
+}
+
 // expose the parser for testing in the browser console
 window.handleLine = handleLine;
+window.applyCv = applyCv;
 render();
+renderCv();
+pollCv();
 </script>
 </body>
 </html>
