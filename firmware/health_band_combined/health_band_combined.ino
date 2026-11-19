@@ -94,7 +94,7 @@ const int CALIBRATION_SAMPLES = 200;
 
 // ---------- OUTPUT ----------
 
-// 0 = CSV line every 20 ms (Serial Monitor, Serial Plotter, testing)
+// 0 = CSV line every 1.5 seconds (Serial Monitor, Serial Plotter, testing)
 // 1 = JSON line every second (for save_data.py)
 //
 // Opening the port from save_data.py usually restarts the ESP32,
@@ -103,6 +103,13 @@ const int CALIBRATION_SAMPLES = 200;
 const int OUTPUT_FORMAT = 0;
 
 const unsigned long JSON_INTERVAL_MS = 1000;
+
+// The sensor is still read every 20 ms (the rep counter needs that),
+// but only every Nth reading is printed as a CSV line:
+// N = 1500 ms / 20 ms = 75, so one line every 1.5 seconds.
+// Set to 1 to print every reading again.
+
+const int CSV_PRINT_EVERY = 75;
 
 // ---------- SENSOR CALIBRATION ----------
 
@@ -193,6 +200,9 @@ bool movementActive = false;
 
 unsigned long lastSampleTime = 0;
 unsigned long lastJsonTime = 0;
+
+int readingsSinceCsvLine = 0;
+int pendingRepEvent = 0;   // a rep finished since the last printed line
 
 // ---------- PULSE OXIMETER VARIABLES ----------
 
@@ -910,9 +920,25 @@ void loop() {
 
         if (OUTPUT_FORMAT == 0) {
 
-            printCsvLine(
-                now, sessionDuration, repEvent, heartRate, spo2
-            );
+            // Remember a rep that finishes between printed lines,
+            // so rep_event is 1 on the next line that is printed
+
+            if (repEvent == 1) {
+                pendingRepEvent = 1;
+            }
+
+            readingsSinceCsvLine++;
+
+            if (readingsSinceCsvLine >= CSV_PRINT_EVERY) {
+
+                readingsSinceCsvLine = 0;
+
+                printCsvLine(
+                    now, sessionDuration, pendingRepEvent, heartRate, spo2
+                );
+
+                pendingRepEvent = 0;
+            }
         }
         else if (now - lastJsonTime >= JSON_INTERVAL_MS) {
 
