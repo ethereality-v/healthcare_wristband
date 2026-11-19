@@ -1,0 +1,896 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Man-GO Live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --leaf: #5AC31A;  --leaf-dark: #3E8F0E;  --leaf-soft: #EAF8DC;
+    --mango: #FFA41B; --mango-dark: #DB7C00; --mango-soft: #FFF2DC;
+    --heart: #FF4B6E; --heart-dark: #D6304F; --heart-soft: #FFE6EB;
+    --sky: #1CB0F6;   --sky-dark: #1386BD;   --sky-soft: #E1F4FE;
+    --ink: #3C3C3C;   --muted: #808080;      --line: #E5E5E5;   --page: #FFFFFF;
+    --radius-card: 18px; --radius-hero: 28px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--page); color: var(--ink);
+    font-family: "Nunito", ui-rounded, "SF Pro Rounded", "Segoe UI", system-ui, sans-serif;
+    font-weight: 700; font-size: 17px; line-height: 1.45;
+  }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  :focus-visible { outline: 3px solid var(--sky); outline-offset: 3px; }
+  .hidden { display: none !important; }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 5; background: var(--page);
+    border-bottom: 2px solid var(--line);
+  }
+  .topbar-inner {
+    max-width: 760px; margin: 0 auto; padding: 12px 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .wordmark { font-weight: 900; font-size: 26px; color: var(--leaf); letter-spacing: -0.5px; margin-right: auto; }
+  .wordmark span { color: var(--mango); }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
+    border-radius: 999px; font-weight: 800; font-size: 15px; white-space: nowrap;
+  }
+  .chip svg { width: 20px; height: 20px; }
+  .chip-xp { color: var(--mango-dark); background: var(--mango-soft); }
+  .chip-sets { color: var(--leaf-dark); background: var(--leaf-soft); }
+  .chip-conn { color: var(--muted); background: #F2F2F2; }
+  .chip-conn .dot { width: 9px; height: 9px; border-radius: 50%; background: #BDBDBD; }
+  .chip-conn.on { color: var(--leaf-dark); background: var(--leaf-soft); }
+  .chip-conn.on .dot { background: var(--leaf); }
+  .chip-conn.demo { color: var(--sky-dark); background: var(--sky-soft); }
+  .chip-conn.demo .dot { background: var(--sky); }
+  .icon-btn {
+    width: 40px; height: 40px; border-radius: 12px; border: 2px solid var(--line);
+    border-bottom-width: 4px; background: #fff; display: grid; place-items: center; padding: 0;
+  }
+  .icon-btn svg { width: 22px; height: 22px; color: var(--muted); }
+  .icon-btn:active { transform: translateY(2px); border-bottom-width: 2px; }
+
+  main { max-width: 760px; margin: 0 auto; padding: 20px 16px 48px; }
+
+  /* ---------- chunky buttons ---------- */
+  .btn {
+    display: block; width: 100%; border: 0; border-radius: 16px; padding: 15px 20px;
+    font-weight: 900; font-size: 18px; letter-spacing: 0.3px; text-align: center;
+    transition: transform 0.06s;
+  }
+  .btn:active { transform: translateY(4px); }
+  .btn-go { background: var(--leaf); color: #fff; box-shadow: 0 4px 0 var(--leaf-dark); }
+  .btn-go:active { box-shadow: 0 0 0 var(--leaf-dark); }
+  .btn-plain { background: #fff; color: var(--sky-dark); border: 2px solid var(--line); box-shadow: 0 4px 0 var(--line); }
+  .btn-plain:active { box-shadow: 0 0 0 var(--line); }
+  .btn-small { display: inline-block; width: auto; padding: 10px 16px; font-size: 15px; border-radius: 14px; }
+  .btn[disabled] { background: var(--line); color: #AFAFAF; box-shadow: 0 4px 0 #D0D0D0; cursor: not-allowed; }
+
+  /* ---------- mascot + speech ---------- */
+  .coach { display: flex; align-items: flex-end; gap: 14px; }
+  .mango { width: 112px; height: 124px; flex: none; transform-origin: 50% 100%; }
+  .mango.hop { animation: hop 0.55s cubic-bezier(.3,1.6,.5,1); }
+  .mango.wobble { animation: wobble 0.8s ease-in-out; }
+  @keyframes hop { 0%{transform:translateY(0) scale(1,1)} 30%{transform:translateY(-18px) scale(.95,1.06)} 60%{transform:translateY(0) scale(1.06,.94)} 100%{transform:translateY(0) scale(1,1)} }
+  @keyframes wobble { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-6deg)} 75%{transform:rotate(6deg)} }
+  .mango .face { display: none; }
+  .mango[data-mood="happy"] .face-happy,
+  .mango[data-mood="wow"] .face-wow,
+  .mango[data-mood="worried"] .face-worried,
+  .mango[data-mood="calm"] .face-calm { display: inline; }
+  .bubble {
+    position: relative; flex: 1; background: #fff; border: 2px solid var(--line);
+    border-radius: 20px; padding: 14px 18px; margin-bottom: 26px; font-size: 18px; font-weight: 800;
+  }
+  .bubble::before, .bubble::after {
+    content: ""; position: absolute; left: -12px; bottom: 18px; border: 10px solid transparent;
+    border-right-color: var(--line); border-left: 0;
+  }
+  .bubble::after { left: -9px; border-right-color: #fff; }
+  .bubble small { display: block; font-weight: 700; font-size: 15px; color: var(--muted); margin-top: 2px; }
+
+  /* ---------- welcome ---------- */
+  .welcome { text-align: center; padding-top: 24px; }
+  .welcome .mango { width: 170px; height: 188px; margin: 0 auto 8px; display: block; }
+  .welcome h1 { font-weight: 900; font-size: 32px; margin: 4px 0 6px; line-height: 1.15; }
+  .welcome p { color: var(--muted); margin: 0 auto 26px; max-width: 34ch; }
+  .welcome .actions { display: grid; gap: 14px; max-width: 360px; margin: 0 auto; }
+  .welcome .note { margin: 22px auto 0; }
+  .note { font-size: 14px; color: var(--muted); max-width: 46ch; margin: 18px auto 0; font-weight: 700; }
+  .note.warn { color: var(--heart-dark); }
+
+  /* ---------- setup steps ---------- */
+  .steps { list-style: none; padding: 0; margin: 26px 0 0; display: grid; gap: 12px; }
+  .step {
+    display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+    border: 2px solid var(--line); border-radius: var(--radius-card); color: var(--muted);
+  }
+  .step .num {
+    width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; flex: none;
+    font-weight: 900; background: #F2F2F2; color: #AFAFAF;
+  }
+  .step.now { border-color: var(--sky); border-bottom-width: 4px; color: var(--ink); }
+  .step.now .num { background: var(--sky); color: #fff; }
+  .step.done .num { background: var(--leaf); color: #fff; }
+  .step.done { color: var(--ink); }
+  .step b { display: block; font-weight: 900; font-size: 18px; }
+  .step span { font-size: 15px; }
+
+  /* ---------- live ---------- */
+  .alert {
+    display: flex; gap: 12px; align-items: center; background: var(--heart-soft); color: var(--heart-dark);
+    border: 2px solid var(--heart); border-radius: var(--radius-card); padding: 12px 16px; margin-bottom: 16px; font-weight: 800;
+  }
+  .alert svg { width: 28px; height: 28px; flex: none; }
+  .hero {
+    border: 2px solid var(--line); border-bottom-width: 5px; border-radius: var(--radius-hero);
+    padding: 20px 22px 24px; margin-top: 6px;
+  }
+  .reps-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .reps { font-weight: 900; line-height: 1; letter-spacing: -2px; }
+  .reps .now { font-size: 104px; color: var(--leaf); display: inline-block; }
+  .reps .now.pop { animation: pop 0.45s cubic-bezier(.3,1.7,.5,1); }
+  @keyframes pop { 0%{transform:scale(1)} 40%{transform:scale(1.22)} 100%{transform:scale(1)} }
+  .reps .goal { font-size: 40px; color: #C8C8C8; letter-spacing: 0; }
+  .reps-label { color: var(--muted); font-size: 16px; margin-top: 2px; }
+  .set-tools { display: flex; gap: 8px; align-items: center; }
+  .bar { height: 20px; border-radius: 999px; background: var(--line); margin-top: 18px; overflow: hidden; }
+  .bar-fill {
+    height: 100%; width: 0%; border-radius: 999px; background: var(--leaf); position: relative;
+    transition: width 0.5s cubic-bezier(.3,1.3,.5,1);
+  }
+  .bar-fill::after {
+    content: ""; position: absolute; left: 12px; right: 12px; top: 4px; height: 5px;
+    border-radius: 999px; background: rgba(255,255,255,0.35);
+  }
+
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 16px; }
+  .stat {
+    border: 2px solid var(--line); border-bottom-width: 4px; border-radius: var(--radius-card);
+    padding: 14px 16px; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; align-items: center;
+  }
+  .stat .ico { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; grid-row: span 2; }
+  .stat .ico svg { width: 28px; height: 28px; }
+  .stat .name { font-size: 15px; color: var(--muted); }
+  .stat .val { font-weight: 900; font-size: 34px; line-height: 1.05; }
+  .stat .val small { font-size: 17px; font-weight: 800; color: var(--muted); margin-left: 3px; }
+  .stat .hint { grid-column: 1 / -1; font-size: 15px; font-weight: 800; margin-top: 6px; }
+  .s-heart .ico { background: var(--heart-soft); color: var(--heart); }
+  .s-oxy .ico { background: var(--sky-soft); color: var(--sky); }
+  .s-pace .ico { background: var(--mango-soft); color: var(--mango); }
+  .s-time .ico { background: var(--leaf-soft); color: var(--leaf); }
+  .beat { animation: beat 1s ease-in-out infinite; transform-origin: 50% 55%; }
+  @keyframes beat { 0%,100%{transform:scale(1)} 15%{transform:scale(1.18)} 30%{transform:scale(1)} 45%{transform:scale(1.1)} }
+  .tone-good { color: var(--leaf-dark); } .tone-warn { color: var(--mango-dark); }
+  .tone-bad { color: var(--heart-dark); } .tone-quiet { color: var(--muted); }
+
+  .status-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px;
+    border: 2px solid var(--line); font-size: 15px; font-weight: 800; color: var(--muted);
+  }
+  .pill .dot { width: 10px; height: 10px; border-radius: 50%; background: #C8C8C8; }
+  .pill.moving { color: var(--leaf-dark); border-color: var(--leaf); }
+  .pill.moving .dot { background: var(--leaf); }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 140%); z-index: 20;
+    background: var(--mango); color: #fff; border-radius: 18px; box-shadow: 0 5px 0 var(--mango-dark);
+    padding: 12px 22px; font-weight: 900; font-size: 20px; white-space: nowrap; visibility: hidden;
+    transition: transform 0.35s cubic-bezier(.3,1.5,.5,1), visibility 0s linear 0.35s;
+  }
+  .toast.show { transform: translate(-50%, 0); visibility: visible; transition: transform 0.35s cubic-bezier(.3,1.5,.5,1); }
+  .toast.info { background: var(--sky); box-shadow: 0 5px 0 var(--sky-dark); font-size: 17px; }
+
+  details.raw { margin-top: 22px; border: 2px solid var(--line); border-radius: var(--radius-card); padding: 10px 14px; }
+  details.raw summary { cursor: pointer; color: var(--muted); font-weight: 800; }
+  details.raw pre {
+    margin: 10px 0 0; max-height: 220px; overflow: auto; font-size: 12px; line-height: 1.5;
+    font-family: Consolas, "Courier New", monospace; color: #555; white-space: pre-wrap; word-break: break-all;
+  }
+  .live-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+
+  /* ---------- overlays ---------- */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(60,60,60,0.45); z-index: 30;
+    display: grid; place-items: end center; padding: 16px;
+  }
+  .sheet {
+    background: #fff; width: 100%; max-width: 520px; border-radius: 28px; padding: 24px 22px 22px;
+    animation: rise 0.35s cubic-bezier(.3,1.3,.5,1);
+  }
+  @keyframes rise { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .sheet h2 { font-weight: 900; font-size: 28px; margin: 6px 0 4px; line-height: 1.15; }
+  .sheet p { color: var(--muted); margin: 0 0 18px; }
+  .done-art { text-align: center; }
+  .done-art .mango { width: 130px; height: 144px; }
+  .done-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 6px 0 20px; }
+  .done-stats div { border: 2px solid var(--line); border-radius: 16px; padding: 10px; text-align: center; }
+  .done-stats b { display: block; font-size: 26px; font-weight: 900; }
+  .done-stats span { font-size: 13px; color: var(--muted); }
+  .field { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 2px solid #F2F2F2; }
+  .field label b { display: block; font-weight: 900; }
+  .field label span { font-size: 14px; color: var(--muted); }
+  .stepper { display: flex; align-items: center; gap: 8px; }
+  .stepper button {
+    width: 42px; height: 42px; border-radius: 12px; border: 2px solid var(--line); border-bottom-width: 4px;
+    background: #fff; font-weight: 900; font-size: 22px; line-height: 1;
+  }
+  .stepper output { min-width: 48px; text-align: center; font-weight: 900; font-size: 22px; }
+  .sheet .btn { margin-top: 18px; }
+
+  @media (max-width: 560px) {
+    .chip-sets, .chip-conn .label { display: none; }
+    .grid { gap: 10px; }
+    .stat { grid-template-columns: 1fr; padding: 12px; }
+    .stat .ico { width: 36px; height: 36px; border-radius: 11px; grid-row: auto; }
+    .stat .ico svg { width: 22px; height: 22px; }
+    .stat .hint { font-size: 13px; margin-top: 2px; }
+    .reps .now { font-size: 84px; }
+    .mango { width: 88px; height: 98px; }
+    .bubble { font-size: 16px; }
+    .stat .val { font-size: 28px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Icons -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-heart" viewBox="0 0 24 24"><path fill="currentColor" d="M12 21s-7.5-4.6-9.6-9.3C.9 8.3 3 4.5 6.7 4.5c2.1 0 3.6 1.1 4.3 2.4h2c.7-1.3 2.2-2.4 4.3-2.4 3.7 0 5.8 3.8 4.3 7.2C19.5 16.4 12 21 12 21z"/></symbol>
+  <symbol id="i-drop" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.5S5 10.2 5 14.8a7 7 0 0 0 14 0C19 10.2 12 2.5 12 2.5z"/><circle cx="9.6" cy="15.2" r="1.6" fill="#fff" opacity=".6"/></symbol>
+  <symbol id="i-pace" viewBox="0 0 24 24"><path fill="currentColor" d="M13.5 2 4.5 13.5h6L9.5 22l9-11.5h-6z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8.5" fill="currentColor"/><path d="M12 8.5V13l3 2" stroke="#fff" stroke-width="2.4" stroke-linecap="round" fill="none"/><rect x="9.5" y="1.5" width="5" height="3" rx="1.5" fill="currentColor"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="m12 2.6 2.9 6 6.5.8-4.8 4.5 1.2 6.5L12 17.2l-5.8 3.2 1.2-6.5L2.6 9.4l6.5-.8z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="m7.5 12.3 3 3 6-6.3" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><path fill="currentColor" d="M10.3 2h3.4l.5 2.6c.6.2 1.2.5 1.7.9l2.5-.9 1.7 2.9-2 1.8c.1.6.1 1.3 0 1.9l2 1.8-1.7 2.9-2.5-.9c-.5.4-1.1.7-1.7.9l-.5 2.6h-3.4l-.5-2.6c-.6-.2-1.2-.5-1.7-.9l-2.5.9L3.9 15l2-1.8c-.1-.6-.1-1.3 0-1.9l-2-1.8 1.7-2.9 2.5.9c.5-.4 1.1-.7 1.7-.9zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" transform="translate(0 1.5)"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.5 1.8 20.5h20.4z"/><path d="M12 9v5.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="17.6" r="1.5" fill="#fff"/></symbol>
+</svg>
+
+<!-- Mascot: an original mango character -->
+<template id="mango-tpl">
+  <svg class="mango" viewBox="0 0 120 132" data-mood="happy" aria-hidden="true">
+    <defs>
+      <radialGradient id="mg" cx="38%" cy="32%" r="75%">
+        <stop offset="0" stop-color="#FFD24A"/><stop offset=".55" stop-color="#FFA41B"/><stop offset="1" stop-color="#F57A1F"/>
+      </radialGradient>
+    </defs>
+    <ellipse cx="60" cy="126" rx="34" ry="5" fill="#000" opacity=".08"/>
+    <path d="M62 16c-6-3-8-9-6-14" stroke="#7A4A1E" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M60 16c8-14 30-16 38-8-10 12-28 14-38 8z" fill="#5AC31A"/>
+    <path d="M62 15c10-6 22-8 32-6" stroke="#3E8F0E" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M58 14C30 14 12 40 14 72c2 34 26 52 50 50 28-2 46-26 44-56C106 36 84 14 58 14z" fill="url(#mg)"/>
+    <ellipse cx="38" cy="40" rx="9" ry="14" fill="#fff" opacity=".35" transform="rotate(25 38 40)"/>
+    <ellipse cx="34" cy="80" rx="7" ry="4.5" fill="#FF6B6B" opacity=".45"/>
+    <ellipse cx="86" cy="80" rx="7" ry="4.5" fill="#FF6B6B" opacity=".45"/>
+    <g class="face face-happy">
+      <ellipse cx="45" cy="64" rx="7.5" ry="9" fill="#fff"/><ellipse cx="75" cy="64" rx="7.5" ry="9" fill="#fff"/>
+      <circle cx="46.5" cy="66" r="4.6" fill="#3C3C3C"/><circle cx="76.5" cy="66" r="4.6" fill="#3C3C3C"/>
+      <circle cx="48" cy="64" r="1.5" fill="#fff"/><circle cx="78" cy="64" r="1.5" fill="#fff"/>
+      <path d="M50 84c5 6 15 6 20 0" stroke="#3C3C3C" stroke-width="4" fill="none" stroke-linecap="round"/>
+    </g>
+    <g class="face face-wow">
+      <path d="M38 64c3-5 11-5 14 0M68 64c3-5 11-5 14 0" stroke="#3C3C3C" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M48 80h24c0 9-5 14-12 14s-12-5-12-14z" fill="#3C3C3C"/>
+      <path d="M53 89c4-3 10-3 14 0-2 3-5 4-7 4s-5-1-7-4z" fill="#FF6B6B"/>
+    </g>
+    <g class="face face-worried">
+      <path d="M37 57l14-6M83 57l-14-6" stroke="#3C3C3C" stroke-width="3.5" stroke-linecap="round"/>
+      <ellipse cx="45" cy="66" rx="7" ry="8.5" fill="#fff"/><ellipse cx="75" cy="66" rx="7" ry="8.5" fill="#fff"/>
+      <circle cx="45" cy="68" r="4.2" fill="#3C3C3C"/><circle cx="75" cy="68" r="4.2" fill="#3C3C3C"/>
+      <path d="M50 90c5-5 15-5 20 0" stroke="#3C3C3C" stroke-width="4" fill="none" stroke-linecap="round"/>
+    </g>
+    <g class="face face-calm">
+      <path d="M38 66c3 3 11 3 14 0M68 66c3 3 11 3 14 0" stroke="#3C3C3C" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M53 84c4 3 10 3 14 0" stroke="#3C3C3C" stroke-width="4" fill="none" stroke-linecap="round"/>
+    </g>
+  </svg>
+</template>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="wordmark">Man<span>-GO</span></div>
+    <span class="chip chip-sets" title="Sets completed"><svg><use href="#i-check"/></svg><span id="setsChip">0 sets</span></span>
+    <span class="chip chip-xp" title="Points: 10 per rep, 50 per finished set"><svg><use href="#i-star"/></svg><span id="xpChip">0 XP</span></span>
+    <span class="chip chip-conn" id="connChip"><span class="dot"></span><span class="label" id="connLabel">Not connected</span></span>
+    <button class="icon-btn" id="settingsBtn" aria-label="Settings"><svg><use href="#i-gear"/></svg></button>
+  </div>
+</header>
+
+<main>
+  <!-- Welcome -->
+  <section id="screenWelcome" class="welcome">
+    <div class="mango-slot" data-mood="happy"></div>
+    <h1>Ready to move?</h1>
+    <p>Plug the wristband into this computer, then connect to see your reps, heart rate and blood oxygen live.</p>
+    <div class="actions">
+      <button class="btn btn-go" id="connectBtn">Connect band</button>
+      <button class="btn btn-plain" id="demoBtn">Try a demo</button>
+    </div>
+    <p class="note" id="browserNote">Close the Arduino Serial Monitor first. Only one program can use the band's port at a time.</p>
+  </section>
+
+  <!-- Setup steps -->
+  <section id="screenSetup" class="hidden">
+    <div class="coach">
+      <div class="mango-slot" data-mood="calm"></div>
+      <div class="bubble" id="setupBubble">Lay the band flat and face up on the table.<small>Don't touch it for a few seconds.</small></div>
+    </div>
+    <ol class="steps">
+      <li class="step" id="step1"><span class="num">1</span><div><b>Lay it flat</b><span>Face up and still while it calibrates</span></div></li>
+      <li class="step" id="step2"><span class="num">2</span><div><b>Hold your start position</b><span>Arm where each rep begins, for about 5 seconds</span></div></li>
+      <li class="step" id="step3"><span class="num">3</span><div><b>Start your reps</b><span>Slow and controlled</span></div></li>
+    </ol>
+    <div class="live-actions"><button class="btn btn-plain btn-small" id="restartBtn1">Restart band</button></div>
+  </section>
+
+  <!-- Error -->
+  <section id="screenError" class="hidden welcome">
+    <div class="mango-slot" data-mood="worried"></div>
+    <h1 id="errorTitle">The accelerometer isn't responding</h1>
+    <p id="errorText">Check the X (D34), Y (D35), Z (D32), SL (D25), 3V3 and GND wires, then restart the band.</p>
+    <div class="actions"><button class="btn btn-go" id="restartBtn2">Restart band</button></div>
+  </section>
+
+  <!-- Live -->
+  <section id="screenLive" class="hidden">
+    <div id="alertBox" class="alert hidden" role="alert"><svg><use href="#i-alert"/></svg><span id="alertText"></span></div>
+    <div class="coach">
+      <div class="mango-slot" id="liveMango" data-mood="happy"></div>
+      <div class="bubble" id="liveBubble" aria-live="polite">Let's go! Start your first rep.</div>
+    </div>
+    <div class="hero">
+      <div class="reps-row">
+        <div>
+          <div class="reps" aria-live="polite"><span class="now" id="repNow">0</span><span class="goal" id="repGoal"> / 10</span></div>
+          <div class="reps-label" id="repLabel">10 more to finish this set</div>
+        </div>
+        <div class="set-tools"><button class="btn btn-plain btn-small" id="newSetBtn">New set</button></div>
+      </div>
+      <div class="bar" role="progressbar" aria-label="Set progress" aria-valuemin="0" aria-valuemax="100" id="bar"><div class="bar-fill" id="barFill"></div></div>
+    </div>
+
+    <div class="grid">
+      <div class="stat s-heart">
+        <div class="ico"><svg id="heartIco"><use href="#i-heart"/></svg></div>
+        <div class="name">Heart rate</div>
+        <div class="val" id="hrVal">--<small>bpm</small></div>
+        <div class="hint tone-quiet" id="hrHint">Hold still for a reading</div>
+      </div>
+      <div class="stat s-oxy">
+        <div class="ico"><svg><use href="#i-drop"/></svg></div>
+        <div class="name">Blood oxygen</div>
+        <div class="val" id="oxVal">--<small>%</small></div>
+        <div class="hint tone-quiet" id="oxHint">Hold still for a reading</div>
+      </div>
+      <div class="stat s-pace">
+        <div class="ico"><svg><use href="#i-pace"/></svg></div>
+        <div class="name">Last rep</div>
+        <div class="val" id="paceVal">--<small>s</small></div>
+        <div class="hint tone-quiet" id="paceHint">Aim for 2 to 4 seconds per rep</div>
+      </div>
+      <div class="stat s-time">
+        <div class="ico"><svg><use href="#i-clock"/></svg></div>
+        <div class="name">Session time</div>
+        <div class="val" id="timeVal">0:00</div>
+        <div class="hint tone-quiet" id="timeHint">Average rep: --</div>
+      </div>
+    </div>
+
+    <div class="status-row">
+      <span class="pill" id="movePill"><span class="dot"></span><span id="moveText">Resting</span></span>
+      <span class="pill" id="totalPill">0 reps total</span>
+      <span class="pill" id="updatedPill">Waiting for data</span>
+    </div>
+
+    <div class="live-actions">
+      <button class="btn btn-plain btn-small" id="restartBtn3">Restart and recalibrate</button>
+      <button class="btn btn-plain btn-small" id="disconnectBtn">Disconnect</button>
+    </div>
+  </section>
+
+  <details class="raw" id="rawBox">
+    <summary>Raw data from the band</summary>
+    <pre id="rawLog">Nothing received yet.</pre>
+  </details>
+</main>
+
+<!-- Set complete -->
+<div class="overlay hidden" id="doneOverlay" role="dialog" aria-modal="true" aria-labelledby="doneTitle">
+  <div class="sheet">
+    <div class="done-art"><div class="mango-slot" data-mood="wow"></div></div>
+    <h2 id="doneTitle">Set complete!</h2>
+    <p id="doneText">You hit your goal. Rest for a minute before the next set.</p>
+    <div class="done-stats">
+      <div><b id="doneReps">10</b><span>reps</span></div>
+      <div><b id="doneAvg">--</b><span>avg seconds</span></div>
+      <div><b id="doneHr">--</b><span>heart rate</span></div>
+    </div>
+    <button class="btn btn-go" id="nextSetBtn">Start next set</button>
+  </div>
+</div>
+
+<!-- Settings -->
+<div class="overlay hidden" id="settingsOverlay" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+  <div class="sheet">
+    <h2 id="settingsTitle">Settings</h2>
+    <p>Your instructor or therapist can tell you what to use.</p>
+    <div class="field">
+      <label><b>Reps per set</b><span>How many reps finish a set</span></label>
+      <div class="stepper"><button data-step="goal" data-d="-1" aria-label="Fewer reps">−</button><output id="goalOut">10</output><button data-step="goal" data-d="1" aria-label="More reps">+</button></div>
+    </div>
+    <div class="field">
+      <label><b>Heart rate limit</b><span>Warn me above this many bpm</span></label>
+      <div class="stepper"><button data-step="hrMax" data-d="-5" aria-label="Lower limit">−</button><output id="hrMaxOut">140</output><button data-step="hrMax" data-d="5" aria-label="Higher limit">+</button></div>
+    </div>
+    <button class="btn btn-go" id="settingsDone">Done</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   Man-GO Live: reads the ESP32 wristband over USB (Web Serial)
+   and shows reps, heart rate and SpO2 as they change.
+   Understands the output of health_band_combined.ino:
+   CSV lines, JSON lines (OUTPUT_FORMAT = 1) and "#" messages.
+   ============================================================ */
+
+const $ = (id) => document.getElementById(id);
+
+// ---------- settings (kept in this browser only) ----------
+const settings = { goal: 10, hrMax: 140 };
+try { Object.assign(settings, JSON.parse(localStorage.getItem("mango-settings") || "{}")); } catch (e) {}
+function saveSettings() { try { localStorage.setItem("mango-settings", JSON.stringify(settings)); } catch (e) {} }
+
+// ---------- state ----------
+const S = {
+  stage: "welcome",            // welcome | setup | live | error
+  setupStep: 1,
+  reps: 0,                     // total reps counted by the band
+  setStart: 0,                 // band rep count when this set began
+  setDone: false,
+  sets: 0,
+  xp: 0,
+  celebrated: 0,               // highest rep already celebrated
+  hr: null, spo2: null, pulseMissing: false,
+  lastRepMs: 0, avgRepMs: 0,
+  moving: false,
+  sessionSec: 0, sessionAt: 0, // last session time from the band, and when it arrived
+  lastData: 0,
+  columns: null,               // CSV column names from the header line
+  hrSeen: [],                  // heart rates during this set
+};
+
+// ---------- mascot ----------
+const tpl = $("mango-tpl");
+document.querySelectorAll(".mango-slot").forEach((slot) => {
+  const svg = tpl.content.firstElementChild.cloneNode(true);
+  svg.setAttribute("data-mood", slot.dataset.mood || "happy");
+  slot.replaceWith(svg);
+  if (slot.id) svg.id = slot.id;
+});
+// unique gradient ids per copy
+document.querySelectorAll("svg.mango").forEach((svg, i) => {
+  const g = svg.querySelector("radialGradient"); g.id = "mg" + i;
+  svg.querySelector('path[fill="url(#mg)"]').setAttribute("fill", `url(#mg${i})`);
+});
+function mood(m, motion) {
+  const el = $("liveMango"); if (!el) return;
+  el.setAttribute("data-mood", m);
+  if (motion) { el.classList.remove("hop", "wobble"); void el.offsetWidth; el.classList.add(motion); }
+}
+
+// ---------- screens ----------
+function show(stage) {
+  S.stage = stage;
+  for (const [id, st] of [["screenWelcome","welcome"],["screenSetup","setup"],["screenLive","live"],["screenError","error"]])
+    $(id).classList.toggle("hidden", st !== stage);
+}
+function setStep(n, text, sub) {
+  S.setupStep = n;
+  if (S.stage !== "setup") show("setup");
+  [1,2,3].forEach((i) => {
+    $("step"+i).classList.toggle("done", i < n);
+    $("step"+i).classList.toggle("now", i === n);
+  });
+  $("setupBubble").innerHTML = text + (sub ? `<small>${sub}</small>` : "");
+}
+
+let toastTimer;
+function toast(text, info) {
+  const t = $("toast"); t.textContent = text; t.classList.toggle("info", !!info);
+  t.classList.add("show"); clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), info ? 3200 : 1600);
+}
+
+// ---------- parsing ----------
+const DEFAULT_COLUMNS = ["time_ms","session_seconds","ax","ay","az","magnitude","pitch_deg","roll_deg",
+  "repetitions","rep_event","last_rep_duration_ms","average_rep_duration_ms","peak_acceleration",
+  "movement_status","heart_rate_bpm","spo2_percent"];
+const num = (v) => { if (v === undefined || v === null || v === "") return null; const n = Number(v); return Number.isFinite(n) ? n : null; };
+
+const rawLines = [];
+function logRaw(line) {
+  rawLines.push(line); if (rawLines.length > 80) rawLines.shift();
+  if ($("rawBox").open) $("rawLog").textContent = rawLines.join("\n");
+}
+$("rawBox").addEventListener("toggle", () => { if ($("rawBox").open) $("rawLog").textContent = rawLines.join("\n") || "Nothing received yet."; });
+
+function handleLine(line) {
+  line = line.replace(/\r/g, "").trim();
+  if (!line) return;
+  logRaw(line);
+
+  if (line.startsWith("#")) return handleMessage(line.slice(1).trim());
+  if (line.startsWith("time_ms")) { S.columns = line.split(","); return; }
+  if (line.startsWith("{")) {
+    try {
+      const d = JSON.parse(line);
+      return applyData({
+        reps: num(d.reps), hr: num(d.heart_rate), spo2: num(d.spo2), session: num(d.session_seconds),
+        lastRep: num(d.last_rep_duration_ms), avgRep: num(d.average_rep_duration_ms),
+        moving: d.movement_status === "ACTIVE",
+      });
+    } catch (e) { return; }
+  }
+  const f = line.split(",");
+  const cols = S.columns || DEFAULT_COLUMNS;
+  if (f.length < 9 || !/^\d+$/.test(f[0])) return;      // not a data line
+  const get = (name) => { const i = cols.indexOf(name); return i >= 0 ? f[i] : undefined; };
+  applyData({
+    reps: num(get("repetitions")), hr: num(get("heart_rate_bpm")), spo2: num(get("spo2_percent")),
+    session: num(get("session_seconds")), lastRep: num(get("last_rep_duration_ms")),
+    avgRep: num(get("average_rep_duration_ms")), moving: get("movement_status") === "ACTIVE",
+  });
+}
+
+function handleMessage(m) {
+  if (m.startsWith("MMA7361 not responding")) {
+    show("error");
+    $("errorTitle").textContent = "The accelerometer isn't responding";
+    $("errorText").textContent = "Check the X (D34), Y (D35), Z (D32), SL (D25), 3V3 and GND wires, then restart the band.";
+    return;
+  }
+  if (m.startsWith("Raw check")) { resetSession(); return setStep(1, "Starting up…", "Lay the band flat and face up."); }
+  if (m.startsWith("MAX30102 not found")) { S.pulseMissing = true; return toast("Pulse sensor not found. Reps still work.", true); }
+  if (m.startsWith("MAX30102 found")) { S.pulseMissing = false; return; }
+  if (m.startsWith("Calibration")) return setStep(1, "Lay the band flat and face up on the table.", "Don't touch it for a few seconds.");
+  if (m.startsWith("Warning: calibration")) return toast("Calibration looked off. Restart with the band flat.", true);
+  if (m.startsWith("Hold the band")) return setStep(2, "Now hold your arm in the starting position.", "Keep still. I'm learning where each rep begins.");
+  if (m.startsWith("Exercise session started")) {
+    setStep(3, "You're all set!");
+    S.sessionSec = 0; S.sessionAt = performance.now();
+    setTimeout(() => { show("live"); render(); }, 700);
+    return;
+  }
+  let r;
+  if ((r = m.match(/^Total repetitions:\s*(\d+)/))) return applyData({ reps: Number(r[1]) });
+  if ((r = m.match(/^Rep duration:\s*([\d.]+)/))) { S.lastRepMs = Number(r[1]) * 1000; return render(); }
+  if ((r = m.match(/^Average rep duration:\s*([\d.]+)/))) { S.avgRepMs = Number(r[1]) * 1000; return render(); }
+}
+
+function applyData(d) {
+  // data before the "session started" message (e.g. page opened mid-session)
+  if (S.stage === "welcome" || S.stage === "setup") { if (d.session !== undefined && d.session !== null) show("live"); }
+  if (d.session !== undefined && d.session !== null) {
+    S.sessionSec = d.session; S.sessionAt = performance.now(); S.lastData = Date.now();
+    S.hr = d.hr && d.hr > 0 ? d.hr : null;
+    S.spo2 = d.spo2 && d.spo2 > 0 ? d.spo2 : null;
+    if (S.hr) S.hrSeen.push(S.hr);
+    S.moving = !!d.moving;
+    if (d.lastRep) S.lastRepMs = d.lastRep;
+    if (d.avgRep) S.avgRepMs = d.avgRep;
+  }
+  if (d.reps !== null && d.reps !== undefined) {
+    if (d.reps < S.reps) { S.setStart = 0; S.celebrated = 0; }   // band restarted
+    S.reps = d.reps;
+    if (S.reps > S.celebrated) {
+      const gained = S.reps - S.celebrated; S.celebrated = S.reps;
+      S.xp += 10 * gained;
+      setTimeout(celebrateRep, 60);
+    }
+  }
+  render();
+}
+
+function resetSession() {
+  Object.assign(S, { reps: 0, setStart: 0, setDone: false, celebrated: 0, hr: null, spo2: null,
+    lastRepMs: 0, avgRepMs: 0, moving: false, sessionSec: 0, sessionAt: performance.now(), columns: null, hrSeen: [] });
+  $("doneOverlay").classList.add("hidden");
+}
+
+// ---------- feedback ----------
+function paceInfo(ms) {
+  if (!ms) return ["Aim for 2 to 4 seconds per rep", "tone-quiet"];
+  const s = ms / 1000;
+  if (s < 1.5) return ["A bit fast. Slow it down", "tone-warn"];
+  if (s <= 5) return ["Great tempo", "tone-good"];
+  return ["Nice and slow", "tone-good"];
+}
+function hrInfo(hr) {
+  if (S.pulseMissing) return ["Pulse sensor not connected", "tone-quiet"];
+  if (!hr) return ["Hold still for a reading", "tone-quiet"];
+  if (hr > settings.hrMax) return [`Above your limit of ${settings.hrMax}`, "tone-bad"];
+  if (hr >= settings.hrMax * 0.9) return ["Close to your limit", "tone-warn"];
+  return ["In your safe range", "tone-good"];
+}
+function oxInfo(o) {
+  if (S.pulseMissing) return ["Pulse sensor not connected", "tone-quiet"];
+  if (!o) return ["Hold still for a reading", "tone-quiet"];
+  if (o < 90) return ["Low. Stop and rest", "tone-bad"];
+  if (o < 95) return ["A little low", "tone-warn"];
+  return ["Normal", "tone-good"];
+}
+
+function celebrateRep() {
+  const n = $("repNow"); n.classList.remove("pop"); void n.offsetWidth; n.classList.add("pop");
+  const inSet = S.reps - S.setStart;
+  const [pace] = paceInfo(S.lastRepMs);
+  if (!alerting()) { mood("wow", "hop"); setTimeout(() => { if (!alerting()) mood("happy"); }, 1200); }
+  if (inSet > 0) toast(`Rep ${inSet}!  +10 XP`);
+  if (alerting()) $("liveBubble").textContent = `Rep ${inSet} counted. Let's take a break first.`;
+  else $("liveBubble").textContent = S.lastRepMs ? `Rep ${inSet}! ${pace}.` : `Rep ${inSet}!`;
+  if (!S.setDone && inSet >= settings.goal) setTimeout(finishSet, 900);
+}
+
+function finishSet() {
+  if (S.setDone) return;
+  S.setDone = true; S.sets += 1; S.xp += 50;
+  const inSet = S.reps - S.setStart;
+  const hrs = S.hrSeen;
+  $("doneReps").textContent = inSet;
+  $("doneAvg").textContent = S.avgRepMs ? (S.avgRepMs / 1000).toFixed(1) : "--";
+  $("doneHr").textContent = hrs.length ? Math.round(hrs.reduce((a, b) => a + b, 0) / hrs.length) : "--";
+  $("doneText").textContent = `You did ${inSet} reps and earned ${inSet * 10 + 50} XP. Rest for a minute before the next set.`;
+  $("doneOverlay").classList.remove("hidden");
+  $("nextSetBtn").focus();
+  render();
+}
+function newSet() {
+  S.setStart = S.reps; S.setDone = false; S.hrSeen = [];
+  $("doneOverlay").classList.add("hidden");
+  $("liveBubble").textContent = "New set. Start when you're ready.";
+  render();
+}
+$("nextSetBtn").onclick = newSet;
+$("newSetBtn").onclick = newSet;
+
+function alerting() {
+  return !!((S.hr && S.hr > settings.hrMax) || (S.spo2 && S.spo2 < 90));
+}
+
+// ---------- render ----------
+function fmtTime(sec) { sec = Math.max(0, Math.floor(sec)); return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`; }
+
+function render() {
+  const inSet = Math.max(0, S.reps - S.setStart);
+  $("repNow").textContent = inSet;
+  $("repGoal").textContent = ` / ${settings.goal}`;
+  const pct = Math.min(100, (inSet / settings.goal) * 100);
+  $("barFill").style.width = pct + "%";
+  $("bar").setAttribute("aria-valuenow", Math.round(pct));
+  $("repLabel").textContent = S.setDone ? "Set complete" : `${Math.max(0, settings.goal - inSet)} more to finish this set`;
+  $("totalPill").textContent = `${S.reps} rep${S.reps === 1 ? "" : "s"} total`;
+  $("xpChip").textContent = `${S.xp} XP`;
+  $("setsChip").textContent = `${S.sets} set${S.sets === 1 ? "" : "s"}`;
+
+  const [hrText, hrTone] = hrInfo(S.hr);
+  $("hrVal").innerHTML = `${S.hr ?? "--"}<small>bpm</small>`;
+  $("hrHint").textContent = hrText; $("hrHint").className = "hint " + hrTone;
+  $("heartIco").classList.toggle("beat", !!S.hr);
+  $("heartIco").style.animationDuration = S.hr ? (60 / S.hr).toFixed(2) + "s" : "";
+
+  const [oxText, oxTone] = oxInfo(S.spo2);
+  $("oxVal").innerHTML = `${S.spo2 ?? "--"}<small>%</small>`;
+  $("oxHint").textContent = oxText; $("oxHint").className = "hint " + oxTone;
+
+  const [pText, pTone] = paceInfo(S.lastRepMs);
+  $("paceVal").innerHTML = `${S.lastRepMs ? (S.lastRepMs / 1000).toFixed(1) : "--"}<small>s</small>`;
+  $("paceHint").textContent = pText; $("paceHint").className = "hint " + pTone;
+  $("timeHint").textContent = `Average rep: ${S.avgRepMs ? (S.avgRepMs / 1000).toFixed(1) + " s" : "--"}`;
+
+  $("movePill").classList.toggle("moving", S.moving);
+  $("moveText").textContent = S.moving ? "Moving" : "Resting";
+
+  // alerts
+  let alert = "";
+  if (S.hr && S.hr > settings.hrMax) alert = `Heart rate is ${S.hr} bpm, above your limit of ${settings.hrMax}. Stop and rest until it comes down.`;
+  else if (S.spo2 && S.spo2 < 90) alert = `Blood oxygen is ${S.spo2}%. Stop, sit down and rest. Tell your instructor if it stays low.`;
+  $("alertBox").classList.toggle("hidden", !alert);
+  $("alertText").textContent = alert;
+  const el = $("liveMango");
+  if (alert && el.getAttribute("data-mood") !== "worried") { mood("worried", "wobble"); $("liveBubble").textContent = "Let's take a break."; }
+  if (!alert && el.getAttribute("data-mood") === "worried") { mood("happy"); $("liveBubble").textContent = "Looking better. Continue when you're ready."; }
+}
+
+// session clock and "last update" ticker
+setInterval(() => {
+  if (S.stage !== "live") return;
+  const sec = S.sessionSec + (S.sessionAt ? (performance.now() - S.sessionAt) / 1000 : 0);
+  $("timeVal").textContent = fmtTime(sec);
+  if (S.lastData) {
+    const ago = (Date.now() - S.lastData) / 1000;
+    $("updatedPill").textContent = ago < 4 ? "Live" : `No data for ${Math.round(ago)} s`;
+    $("updatedPill").className = "pill" + (ago < 4 ? " moving" : "");
+  }
+}, 250);
+
+// ---------- settings sheet ----------
+function syncSettingsUI() { $("goalOut").textContent = settings.goal; $("hrMaxOut").textContent = settings.hrMax; }
+$("settingsBtn").onclick = () => { syncSettingsUI(); $("settingsOverlay").classList.remove("hidden"); $("settingsDone").focus(); };
+$("settingsDone").onclick = () => { $("settingsOverlay").classList.add("hidden"); saveSettings(); render(); };
+document.querySelectorAll("[data-step]").forEach((b) => b.onclick = () => {
+  const k = b.dataset.step, d = Number(b.dataset.d);
+  settings[k] = k === "goal" ? Math.min(50, Math.max(1, settings[k] + d)) : Math.min(220, Math.max(60, settings[k] + d));
+  syncSettingsUI(); saveSettings(); render();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") { $("settingsOverlay").classList.add("hidden"); }
+});
+
+// ---------- connection chip ----------
+function setConn(kind) {
+  const c = $("connChip"); c.classList.remove("on", "demo");
+  if (kind === "on") { c.classList.add("on"); $("connLabel").textContent = "Band connected"; }
+  else if (kind === "demo") { c.classList.add("demo"); $("connLabel").textContent = "Demo"; }
+  else $("connLabel").textContent = "Not connected";
+}
+
+// ---------- Web Serial ----------
+let port = null, reader = null, keepReading = false;
+
+async function connect() {
+  if (!("serial" in navigator)) {
+    $("browserNote").textContent = "This browser can't talk to USB devices. Open this page in Google Chrome or Microsoft Edge, or try the demo.";
+    $("browserNote").classList.add("warn");
+    return;
+  }
+  stopDemo();
+  try {
+    port = await navigator.serial.requestPort();      // the browser asks which port (pick the CP210x one)
+    await port.open({ baudRate: 115200 });
+  } catch (e) {
+    if (e.name !== "NotFoundError") {
+      $("browserNote").textContent = "Couldn't open the port. Close the Arduino Serial Monitor or any other program using it, then try again.";
+      $("browserNote").classList.add("warn");
+    }
+    port = null; return;
+  }
+  setConn("on");
+  setStep(1, "Connected! Restarting the band…", "Lay it flat and face up on the table.");
+  readLoop();
+  restartBand();
+}
+
+async function readLoop() {
+  keepReading = true;
+  const decoder = new TextDecoder();
+  let buffer = "";
+  while (port && port.readable && keepReading) {
+    reader = port.readable.getReader();
+    try {
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let i;
+        while ((i = buffer.indexOf("\n")) >= 0) { handleLine(buffer.slice(0, i)); buffer = buffer.slice(i + 1); }
+        if (buffer.length > 4000) buffer = "";
+      }
+    } catch (e) {
+      break;                                          // unplugged or port error
+    } finally {
+      try { reader.releaseLock(); } catch (e) {}
+    }
+  }
+  if (keepReading) onDisconnected("The band was disconnected. Check the USB cable, then connect again.");
+}
+
+// Pulses the ESP32's reset line the same way the Arduino IDE does after an upload,
+// so the sketch starts from calibration.
+async function restartBand() {
+  if (demo) { startDemo(); return; }
+  if (!port) return;
+  try {
+    await port.setSignals({ dataTerminalReady: false, requestToSend: true });
+    await new Promise((r) => setTimeout(r, 120));
+    await port.setSignals({ dataTerminalReady: false, requestToSend: false });
+  } catch (e) {
+    toast("Press the EN button on the band to restart it.", true);
+  }
+}
+
+async function disconnect() {
+  keepReading = false;
+  try { if (reader) await reader.cancel(); } catch (e) {}
+  try { if (port) await port.close(); } catch (e) {}
+  port = null;
+  onDisconnected();
+}
+function onDisconnected(message) {
+  keepReading = false; port = null;
+  setConn(demo ? "demo" : "off");
+  show("welcome");
+  $("browserNote").textContent = message || "Disconnected. Connect again whenever you're ready.";
+  $("browserNote").classList.toggle("warn", !!message);
+}
+
+$("connectBtn").onclick = connect;
+$("disconnectBtn").onclick = () => (demo ? (stopDemo(), onDisconnected()) : disconnect());
+["restartBtn1", "restartBtn2", "restartBtn3"].forEach((id) => $(id).onclick = restartBand);
+
+// ---------- demo mode: produces the same lines the band prints ----------
+let demo = false, demoTimers = [];
+function stopDemo() { demo = false; demoTimers.forEach(clearTimeout); demoTimers.forEach(clearInterval); demoTimers = []; }
+function at(ms, fn) { demoTimers.push(setTimeout(fn, ms)); }
+
+function startDemo() {
+  stopDemo(); demo = true; setConn("demo");
+  const say = (l) => handleLine(l);
+  at(200, () => { say("# Raw check (mV): X=1702 Y=1598 Z=1886"); say("# MAX30102 found. Keep it pressed against the skin and hold still for readings."); });
+  at(500, () => say("# Calibration: place the sensor flat, face up and still."));
+  at(3200, () => { say("# Zero offsets: X=1701.4 Y=1599.2 Z=1680.8 mV"); say("# Hold the band in your exercise starting position."); say("# Keep your arm still while the starting angle is measured."); });
+  at(7200, () => {
+    say("# Starting pitch: 0.4 degrees"); say("# Starting roll: -1.2 degrees");
+    say("# Health Band Started!"); say("# Exercise session started!");
+    say("time_ms,session_seconds,ax,ay,az,magnitude,pitch_deg,roll_deg,repetitions,rep_event,last_rep_duration_ms,average_rep_duration_ms,peak_acceleration,movement_status,heart_rate_bpm,spo2_percent");
+    runDemoSession();
+  });
+}
+function runDemoSession() {
+  const t0 = performance.now();
+  let reps = 0, total = 0, last = 0, hr = 0, nextRep = 3500, phase = 0, peak = 9.8;
+  const tick = () => {
+    if (!demo) return;
+    const t = performance.now() - t0, sec = t / 1000;
+    // a rep about every 3.3 s, with a short rest after 10
+    if (t >= nextRep) {
+      reps++; last = 2600 + Math.round(Math.random() * 1400) - (reps % 7 === 0 ? 1700 : 0); total += last; peak = Math.max(peak, 11 + Math.random() * 3);
+      handleLine("# --------------------------"); handleLine("# REP COMPLETED");
+      handleLine(`# Total repetitions: ${reps}`);
+      handleLine(`# Rep duration: ${(last / 1000).toFixed(2)} seconds`);
+      handleLine(`# Average rep duration: ${(total / reps / 1000).toFixed(2)} seconds`);
+      handleLine(`# Peak acceleration in rep: ${peak.toFixed(2)} m/s^2`);
+      handleLine("# --------------------------");
+      nextRep += reps % 10 === 0 ? 14000 : 3300;
+    }
+    phase += 0.9;
+    const moving = (nextRep - t) < 2600 && (nextRep - t) > 0;
+    hr = sec < 6 ? 0 : Math.round(78 + Math.min(38, reps * 2.2) + Math.sin(sec / 3) * 3);
+    const showHr = hr && !(moving && Math.random() < 0.25);
+    const spo2 = showHr ? 97 + Math.round(Math.random() * 2) : "";
+    const pitch = moving ? (40 + 35 * Math.sin(phase)).toFixed(1) : (Math.random() * 2).toFixed(1);
+    const line = [Math.round(9000 + t), sec.toFixed(2), "0.412", "-0.233", "9.784", (9.8 + (moving ? Math.random() * 2 : 0)).toFixed(3),
+      pitch, "-1.0", reps, 0, last, reps ? (total / reps).toFixed(1) : "0.0", peak.toFixed(3),
+      moving ? "ACTIVE" : "RESTING", showHr ? hr : "", spo2].join(",");
+    handleLine(line);
+  };
+  demoTimers.push(setInterval(tick, 1500));
+  // check for reps more often than lines so they show up on time
+  const repWatch = setInterval(() => {
+    if (!demo) return;
+    const t = performance.now() - t0;
+    if (t >= nextRep) tick();
+  }, 200);
+  demoTimers.push(repWatch);
+}
+$("demoBtn").onclick = () => { if (port) return; startDemo(); };
+
+// expose the parser for testing in the browser console
+window.handleLine = handleLine;
+render();
+</script>
+</body>
+</html>
