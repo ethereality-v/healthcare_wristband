@@ -97,10 +97,11 @@ void sendHello() {
     float off[3];
     accel.offsets(off);
     bandLink.sendf("{\"type\":\"hello\",\"device\":\"%s\",\"fw\":\"%s\",\"accel\":\"MMA7361\",\"range_g\":%s,"
-               "\"calibrated\":%s,\"offsets_mv\":[%.0f,%.0f,%.0f],\"pulse\":%s,\"wifi\":%s,\"exercises\":%d}",
+               "\"calibrated\":%s,\"offsets_mv\":[%.0f,%.0f,%.0f],\"pulse\":%s,\"wifi\":%s,\"bluetooth\":%s,\"exercises\":%d}",
                bandLink.deviceId(), FIRMWARE_VERSION, ACCEL_RANGE_6G ? "6" : "1.5",
                accel.isCalibrated() ? "true" : "false", off[0], off[1], off[2],
-               pulse.present() ? "true" : "false", bandLink.wifiConnected() ? "true" : "false", EXERCISE_COUNT);
+               pulse.present() ? "true" : "false", bandLink.wifiConnected() ? "true" : "false",
+               bandLink.bluetoothConnected() ? "true" : "false", EXERCISE_COUNT);
 }
 
 void sendExerciseList() {
@@ -264,6 +265,9 @@ void loop() {
         if (rawStream) {
             bandLink.sendf("{\"type\":\"raw\",\"t\":%lu,\"ax\":%.3f,\"ay\":%.3f,\"az\":%.3f}", (unsigned long)now,
                        lastAccel.x, lastAccel.y, lastAccel.z);
+        } else {
+            bandLink.sendBluetoothf("{\"type\":\"raw\",\"t\":%lu,\"ax\":%.3f,\"ay\":%.3f,\"az\":%.3f}",
+                                    (unsigned long)now, lastAccel.x, lastAccel.y, lastAccel.z);
         }
 
         if (state == BandState::Active) {

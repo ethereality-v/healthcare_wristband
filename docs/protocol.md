@@ -1,6 +1,6 @@
 # Protocols
 
-1. [Band ↔ laptop](#band--laptop): one JSON object per line, over USB serial (115200 baud) or Wi-Fi UDP
+1. [Band ↔ laptop](#band--laptop): one JSON object per line, over USB serial (115200 baud), Bluetooth Classic SPP, or Wi-Fi UDP
 2. [Laptop REST API](#rest-api), used by the dashboard
 3. [Computer-vision integration](#computer-vision-integration), for the CV coach teammate
 
@@ -13,6 +13,13 @@ Exercise IDs everywhere come from [`shared/exercises.json`](../shared/exercises.
 **Wi-Fi:** the band sends UDP datagrams to `HOST_IP:5005`. The laptop learns the band's address
 from them and sends commands back to `band:5006`. The message format is the same as serial.
 
+**Bluetooth:** the primary sketch advertises as `wristband-XXXX`; the standalone combined sketch
+advertises as `HealthBand-XXXX`. Pair the computer with the device and open the resulting Bluetooth
+serial port. The primary sketch sends its normal protocol messages and `raw` accelerometer samples
+at 50 Hz over Bluetooth. The combined sketch sends one `sample` JSON object per accelerometer
+sample (50 Hz), with the latest valid heart-rate and SpO2 readings included. Commands can be sent
+as newline-delimited JSON over Bluetooth to the primary sketch.
+
 ### Commands (laptop → band)
 
 | Command | Example | Effect |
@@ -21,7 +28,7 @@ from them and sends commands back to `band:5006`. The message format is the same
 | `stop` | `{"cmd":"stop"}` | Ends the set and replies `set_done`. |
 | `calibrate` | `{"cmd":"calibrate"}` | Zero-g calibration. The band must be flat, face up and still. Saved to flash. |
 | `alert` | `{"cmd":"alert","level":"stop"}` | `stop` = fast-flash LED, `warn` = 2 flashes, `none` = clear. |
-| `raw` | `{"cmd":"raw","on":true}` | Streams raw acceleration at 50 Hz (for tuning thresholds). |
+| `raw` | `{"cmd":"raw","on":true}` | Streams raw acceleration at 50 Hz over USB/Wi-Fi (Bluetooth always streams these samples). |
 | `ping` | `{"cmd":"ping"}` | Replies `hello`. |
 | `list` | `{"cmd":"list"}` | Replies with the exercise IDs the band can count. |
 
@@ -29,7 +36,7 @@ from them and sends commands back to `band:5006`. The message format is the same
 
 | `type` | Fields | When |
 |---|---|---|
-| `hello` | `device, fw, accel, range_g, calibrated, offsets_mv, pulse, wifi, exercises` | Boot and `ping` |
+| `hello` | `device, fw, accel, range_g, calibrated, offsets_mv, pulse, wifi, bluetooth, exercises` | Boot and `ping` |
 | `started` | `exercise, set, target, unit` | After `start` |
 | `ready` | `exercise, set` | Start position captured. The patient can begin. |
 | `rep` | `exercise, set, rep, duration_ms, rom_deg, peak_accel, t` | Each completed rep. `rom_deg` = range of motion (tilt exercises). |
@@ -39,7 +46,8 @@ from them and sends commands back to `band:5006`. The message format is the same
 | `status` | `t, state, exercise, set, count, partial, target, angle, moving, hr, spo2, contact, alert, clipped, battery_v` | Twice per second |
 | `alert` | `level, reason, hr, hr_max` | Band-side HR limit exceeded / recovered |
 | `calibrated` | `offsets_mv` | Calibration succeeded |
-| `raw` | `t, ax, ay, az` (m/s²) | Raw mode only |
+| `raw` | `t, ax, ay, az` (m/s²) | 50 Hz over Bluetooth; optional raw mode on USB/Wi-Fi |
+| `sample` | `t, session_seconds, ax, ay, az, magnitude, pitch_deg, roll_deg, repetitions, rep_event, last_rep_duration_ms, average_rep_duration_ms, peak_acceleration, movement_status, heart_rate, spo2` | Every 20 ms from the standalone combined sketch over Bluetooth; unavailable vitals are `null` |
 | `error`, `log` | `msg` | Problems / information |
 
 `unit` is `reps`, `steps` (carries) or `seconds` (wall sit). `partial` counts tilt reps that

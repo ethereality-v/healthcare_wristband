@@ -2,7 +2,7 @@
 // Wiring diagram and pin table: hardware/wiring.md
 #pragma once
 
-#define FIRMWARE_VERSION "1.0.0"
+#define FIRMWARE_VERSION "1.0.1"
 
 // ---------- MMA7361 accelerometer (analog) ----------
 // X/Y/Z must be on ADC1 pins (GPIO 32-39): ADC2 stops working when Wi-Fi is on.

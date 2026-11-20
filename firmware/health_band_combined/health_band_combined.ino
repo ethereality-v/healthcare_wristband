@@ -15,6 +15,7 @@
   - Peak acceleration
   - Movement status
   - Heart rate and SpO2 (MAX30102)
+  - 50 Hz JSON sensor samples over Bluetooth Classic SPP
 
   WIRING (pin names as printed on the board)
     MMA7361 X            -> D34
@@ -61,6 +62,7 @@
 #include <math.h>
 #include <Wire.h>
 #include <DFRobot_MAX30102.h>
+#include <BluetoothSerial.h>
 
 // ---------- PINS ----------
 
@@ -207,6 +209,7 @@ int pendingRepEvent = 0;   // a rep finished since the last printed line
 // ---------- PULSE OXIMETER VARIABLES ----------
 
 DFRobot_MAX30102 particleSensor;
+BluetoothSerial bluetooth;
 
 bool pulseSensorFound = false;
 
@@ -804,6 +807,36 @@ void printJsonLine(
     Serial.println("\"}");
 }
 
+void printBluetoothSample(
+    unsigned long now,
+    unsigned long sessionDuration,
+    int repEvent,
+    int heartRate,
+    int spo2
+) {
+    if (!bluetooth.hasClient()) return;
+
+    char heartRateText[8];
+    char spo2Text[8];
+    if (heartRate > 0) snprintf(heartRateText, sizeof(heartRateText), "%d", heartRate);
+    else snprintf(heartRateText, sizeof(heartRateText), "null");
+    if (spo2 > 0) snprintf(spo2Text, sizeof(spo2Text), "%d", spo2);
+    else snprintf(spo2Text, sizeof(spo2Text), "null");
+
+    char line[320];
+    snprintf(line, sizeof(line),
+        "{\"type\":\"sample\",\"t\":%lu,\"session_seconds\":%.2f,"
+        "\"ax\":%.3f,\"ay\":%.3f,\"az\":%.3f,\"magnitude\":%.3f,"
+        "\"pitch_deg\":%.1f,\"roll_deg\":%.1f,\"repetitions\":%d,\"rep_event\":%d,"
+        "\"last_rep_duration_ms\":%lu,\"average_rep_duration_ms\":%.1f,"
+        "\"peak_acceleration\":%.3f,\"movement_status\":\"%s\","
+        "\"heart_rate\":%s,\"spo2\":%s}",
+        now, sessionDuration / 1000.0, ax, ay, az, magnitude, pitch, roll, repetitions, repEvent,
+        lastRepDuration, averageRepDuration, peakAcceleration, movementActive ? "ACTIVE" : "RESTING",
+        heartRateText, spo2Text);
+    bluetooth.println(line);
+}
+
 // ---------- SETUP ----------
 
 void setup() {
@@ -811,6 +844,15 @@ void setup() {
     Serial.begin(115200);
 
     delay(500);
+
+    uint64_t mac = ESP.getEfuseMac();
+    char bluetoothName[24];
+    snprintf(bluetoothName, sizeof(bluetoothName), "HealthBand-%04X", (unsigned)((mac >> 32) & 0xFFFF));
+    if (!bluetooth.begin(bluetoothName)) {
+        Serial.println("# Bluetooth SPP failed to start.");
+    } else {
+        Serial.printf("# Bluetooth SPP ready: %s\n", bluetoothName);
+    }
 
     pinMode(PIN_SLEEP, OUTPUT);
     digitalWrite(PIN_SLEEP, HIGH);
@@ -915,6 +957,8 @@ void loop() {
             heartRate = 0;
             spo2 = 0;
         }
+
+        printBluetoothSample(now, sessionDuration, repEvent, heartRate, spo2);
 
         // Output
 

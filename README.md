@@ -10,7 +10,7 @@ the prescribed session, logs everything to a JSON database, shows a live dashboa
 progression or regression for the kinesiologist to approve.
 
 ```
-firmware/wristband/   ESP32 Arduino sketch (MMA7361 + MAX30102, rep detection, USB/Wi-Fi)
+firmware/wristband/   ESP32 Arduino sketch (MMA7361 + MAX30102, rep detection, USB/Wi-Fi/Bluetooth)
 firmware/test/        PC unit tests for the rep detector (g++)
 host/wristband/       Python laptop app: band link, sessions, safety, dosage, database, dashboard
 host/tests/           pytest suite (includes an end-to-end run against a simulated band)
@@ -50,11 +50,19 @@ coach (`POST /api/cv`), or you can type a count. Use `--speed 5` for a faster de
    ```
 5. **Optional Wi-Fi:** copy `firmware/wristband/secrets.example.h` to `secrets.h`, fill in
    your network and laptop IP, re-upload, then run `python -m wristband run --udp`.
+6. **Optional Bluetooth:** pair your computer with the band's `wristband-XXXX` device. The
+   computer exposes it as a Bluetooth serial port (a COM port on Windows; the device path varies
+   on macOS/Linux). Run the same app with `python -m wristband run --port <Bluetooth-serial-port>`.
+   The Bluetooth connection streams newline-delimited JSON, including raw accelerometer samples
+   at 50 Hz. The separate `firmware/health_band_combined` sketch advertises as `HealthBand-XXXX`
+   and sends complete JSON samples at 50 Hz.
 
 Other commands:
 
 - `python -m wristband monitor --port COM3`: print what the band sends and type commands.
   Add `--raw-csv data.csv` to record raw acceleration for tuning thresholds.
+- Bluetooth Classic SPP is built into the documented ESP32-WROOM board; no extra wiring is needed.
+  Pair one computer at a time and select its Bluetooth serial port just like a USB serial port.
 - `python -m wristband report --patient P001`: session history in the terminal.
 
 ## How reps are counted

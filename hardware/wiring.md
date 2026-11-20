@@ -67,6 +67,19 @@ pins that come with the modules.
 Battery voltage reporting is optional: add two 100 kΩ resistors as a divider from LiPo + to
 GPIO 33 and GND, then set `PIN_BATTERY 33` in `config.h`.
 
+## Bluetooth connection (no extra wiring)
+
+The ESP32-WROOM's built-in Classic Bluetooth radio provides a Serial Port Profile (SPP) connection.
+Pair your computer with the advertised device (`wristband-XXXX` for the main firmware or
+`HealthBand-XXXX` for the combined sketch), then open the Bluetooth serial port created by your
+operating system. Its name/path varies by OS; Windows typically assigns a COM port.
+
+The connection uses newline-delimited JSON, like USB serial. The main firmware sends accelerometer
+samples at 50 Hz and vitals as they are updated. The combined sketch sends one complete sensor
+sample at 50 Hz, including the latest valid heart rate and SpO2 (or `null` when unavailable).
+Classic Bluetooth SPP requires a classic ESP32 such as the documented ESP32-WROOM; ESP32-C3 boards
+do not support this mode.
+
 ## Wearing it
 
 - The MAX30102's window must touch the skin on the **inside of the wrist**, held snug by the
